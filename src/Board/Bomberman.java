@@ -12,9 +12,9 @@ package Board;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 
-public class Pacman extends JFrame {
+public class Bomberman extends JFrame {
 
-    public Pacman() {
+    public Bomberman() {
         
         initUI();
     }
@@ -23,7 +23,7 @@ public class Pacman extends JFrame {
         
         add(new Board());
         
-        setTitle("Pacman");
+        setTitle("Bomberman");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(470, 520);
         setLocationRelativeTo(null);
@@ -32,7 +32,7 @@ public class Pacman extends JFrame {
 
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
-            Pacman ex = new Pacman();
+            Bomberman ex = new Bomberman();
             ex.setVisible(true);
         });
     }
