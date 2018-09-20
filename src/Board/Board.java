@@ -44,17 +44,17 @@ public class Board extends JPanel implements ActionListener {
     private boolean inGame = false;
     private boolean dying = false;
 
-    private final int BLOCK_SIZE = 30;
+    private final int BLOCK_SIZE = 32;
     private final int N_BLOCKS = 15;
     private final int SCREEN_SIZE = N_BLOCKS * BLOCK_SIZE;
     private final int PAC_ANIM_DELAY = 2;
-    private final int PACMAN_ANIM_COUNT = 4;
     private final int MAX_GHOSTS = 12;
-    private final int PACMAN_SPEED = 6;
+    private final int BOMBERMAN_SPEED = 32;
+    private final int BOMBERMAN_MOVE_STEPS = 8;
 
     private int pacAnimCount = PAC_ANIM_DELAY;
     private int pacAnimDir = 1;
-    private int pacmanAnimPos = 0;
+    private int bombermanAnimPos = 0;
     private int N_GHOSTS = 1;
     private int pacsLeft, score;
     private int[] dx, dy;
@@ -62,11 +62,13 @@ public class Board extends JPanel implements ActionListener {
 
     private Image ghost;
     private Image bomber;
-    private Image pacman1, pacman2up, pacman2left, pacman2right, pacman2down;
-    private Image pacman3up, pacman3down, pacman3left, pacman3right;
-    private Image pacman4up, pacman4down, pacman4left, pacman4right;
+    private Image bomberman1, bomberman2up, bomberman2left, bomberman2right, bomberman2down;
+    private Image bomberman3up, bomberman3down, bomberman3left, bomberman3right;
+    private Image bomberman4up, bomberman4down, bomberman4left, bomberman4right;
 
-    private int pacman_x, pacman_y, pacmand_x, pacmand_y;
+    private int bomberman_x, bomberman_y;
+    private int bombermand_x = 32; // Dimensions of the bomberman
+    private int bombermand_y = 32;
     private int req_dx, req_dy, view_dx, view_dy;
 
     private final short levelData[] = {
@@ -89,10 +91,9 @@ public class Board extends JPanel implements ActionListener {
     
     private final Cell[][] mapCells = Cell.getMapCells(N_BLOCKS, N_BLOCKS, BLOCK_SIZE);
     
-    private final int validSpeeds[] = {1, 2, 3, 4, 6, 8};
-    private final int maxSpeed = 6;
-
-    private int currentSpeed = 3;
+    private final int validSpeeds[] = {32};
+    private final int maxSpeed = 32;
+    private int currentSpeed = 32;
     private short[] screenData;
     private Timer timer;
 
@@ -125,7 +126,6 @@ public class Board extends JPanel implements ActionListener {
         ghostSpeed = new int[MAX_GHOSTS];
         dx = new int[4];
         dy = new int[4];
-        
         timer = new Timer(40, this);
         timer.start();
     }
@@ -138,17 +138,17 @@ public class Board extends JPanel implements ActionListener {
     }
 
     private void doAnim() {
-
-        pacAnimCount--;
-
-        if (pacAnimCount <= 0) {
-            pacAnimCount = PAC_ANIM_DELAY;
-            pacmanAnimPos = pacmanAnimPos + pacAnimDir;
-
-            if (pacmanAnimPos == (PACMAN_ANIM_COUNT - 1) || pacmanAnimPos == 0) {
-                pacAnimDir = -pacAnimDir;
-            }
-        }
+        
+//        pacAnimCount--;
+//
+//        if (pacAnimCount <= 0) {
+//            pacAnimCount = PAC_ANIM_DELAY;
+//            bombermanAnimPos = bombermanAnimPos + pacAnimDir;
+//
+//            if (bombermanAnimPos == (BOMBERMAN_ANIM_COUNT - 1) || bombermanAnimPos == 0) {
+//                pacAnimDir = -pacAnimDir;
+//            }
+//        }
     }
 
     private void playGame(Graphics2D g2d) {
@@ -159,8 +159,8 @@ public class Board extends JPanel implements ActionListener {
 
         } else {
 
-            movePacman();
-            drawPacman(g2d);
+            moveBomberman(g2d);
+            //drawBomberman(g2d);
             moveGhosts(g2d);
             checkMaze();
         }
@@ -193,7 +193,7 @@ public class Board extends JPanel implements ActionListener {
         g.drawString(s, SCREEN_SIZE / 2 + 96, SCREEN_SIZE + 16);
 
         for (i = 0; i < pacsLeft; i++) {
-            g.drawImage(pacman3left, i * 28 + 8, SCREEN_SIZE + 1, this);
+            g.drawImage(bomberman3left, i * 28 + 8, SCREEN_SIZE + 1, this);
         }
     }
 
@@ -276,8 +276,8 @@ public class Board extends JPanel implements ActionListener {
             ghost_y[i] = ghost_y[i] + (ghost_dy[i] * ghostSpeed[i]);
             drawGhost(g2d, ghost_x[i] + 1, ghost_y[i] + 1);
 
-            if (pacman_x > (ghost_x[i] - 12) && pacman_x < (ghost_x[i] + 12)
-                    && pacman_y > (ghost_y[i] - 12) && pacman_y < (ghost_y[i] + 12)
+            if (bomberman_x > (ghost_x[i] - 12) && bomberman_x < (ghost_x[i] + 12)
+                    && bomberman_y > (ghost_y[i] - 12) && bomberman_y < (ghost_y[i] + 12)
                     && inGame) {
 
                 dying = true;
@@ -295,18 +295,21 @@ public class Board extends JPanel implements ActionListener {
         g2d.drawImage(bomber, x, y, this);
     }
     
-    private void movePacman() {
+    private void moveBomberman(Graphics2D g2d) {
         // If bomber wants to walk
+        boolean will_move = false;
+        int d_x = 0;
+        int d_y = 0;
         if (req_dx != 0 || req_dy != 0) {
-            // We find the cell we are in
-            int cell_x = (int)Math.floor((double)pacman_x / BLOCK_SIZE);
-            int cell_y = (int)Math.floor((double)pacman_y / BLOCK_SIZE);
+            // We find the cell we are in    
+            int cell_x = (int)Math.floor((double)bomberman_x / BLOCK_SIZE);
+            int cell_y = (int)Math.floor((double)bomberman_y / BLOCK_SIZE);
             Map<String, Boolean> current = mapCells[cell_y][cell_x].getBorders();
             // We find out destination 
-            int d_x = (pacman_x + PACMAN_SPEED * req_dx);
-            int d_y = (pacman_y + PACMAN_SPEED * req_dy);
-            int d_cell_x = (int)Math.floor((double)d_x / BLOCK_SIZE);
-            int d_cell_y = (int)Math.floor((double)d_y / BLOCK_SIZE);
+            d_x = (bomberman_x + BOMBERMAN_SPEED * req_dx);
+            d_y = (bomberman_y + BOMBERMAN_SPEED * req_dy);
+            int d_cell_x = (int)Math.floor((((double)d_x) / BLOCK_SIZE));
+            int d_cell_y = (int)Math.floor((((double)d_y) / BLOCK_SIZE));
             // If try to go out of bounds
             if(d_cell_x < 0 || d_cell_x == N_BLOCKS || d_cell_y < 0 || d_cell_y == N_BLOCKS){
                 return;
@@ -316,130 +319,57 @@ public class Board extends JPanel implements ActionListener {
             if(cell_x != d_cell_x || cell_y != d_cell_y){
                 // Going right
                 if(req_dx == 1){
-                    if(current.get("right_b") || destination.get("left_b")){
-                        pacman_x = mapCells[cell_y][cell_x].getX() + BLOCK_SIZE - 1;
-                    } else {
-                        pacman_x = d_x;
+                    if (!current.get("right_b") && !destination.get("left_b")){
+                        will_move = true;
                     }
                 }
                 // Going left
                 if(req_dx == -1){
-                    if(current.get("left_b") || destination.get("right_b")){
-                        pacman_x = mapCells[cell_y][cell_x].getX() + 1;
-                    } else {
-                        pacman_x = d_x;
+                    if(!current.get("left_b") && !destination.get("right_b")){
+                        will_move = true;
                     }
                 }
                 // Going up
                 if(req_dy == -1){
-                    if(current.get("top_b") || destination.get("bottom_b")){
-                        pacman_y = mapCells[cell_y][cell_x].getY() + 1;
-                    } else {
-                        pacman_y = d_y;
+                    if(!current.get("top_b") && !destination.get("bottom_b")){
+                        will_move = true;
                     }
                 }
                 // Going down
                 if(req_dy == 1){
-                    if(current.get("bottom_b") || destination.get("top_b")){
-                        pacman_y = mapCells[cell_y][cell_x].getY() + BLOCK_SIZE - 1;
-                    } else {
-                        pacman_y = d_y;
+                    if(!current.get("bottom_b") && !destination.get("top_b")){
+                        bomberman_y = d_y;
+                        will_move = true;
                     }
                 }
             } else {
-                pacman_x = d_x;
-                pacman_y = d_y;
+                bomberman_x = d_x;
+                bomberman_y = d_y;
             }
             view_dx = req_dx;
             view_dy = req_dy;
         }
-    }
-
-    private void drawPacman(Graphics2D g2d) {
-
-        if (view_dx == -1) {
-            drawPacnanLeft(g2d);
-        } else if (view_dx == 1) {
-            drawPacmanRight(g2d);
-        } else if (view_dy == -1) {
-            drawPacmanUp(g2d);
-        } else {
-            drawPacmanDown(g2d);
+        if (will_move){
+            drawMovingBomberman(g2d);
+        } else{
+            drawBomberman(g2d);
         }
     }
 
-    private void drawPacmanUp(Graphics2D g2d) {
-
-        switch (pacmanAnimPos) {
-            case 1:
-                g2d.drawImage(pacman2up, pacman_x + 1, pacman_y + 1, this);
-                break;
-            case 2:
-                g2d.drawImage(pacman3up, pacman_x + 1, pacman_y + 1, this);
-                break;
-            case 3:
-                g2d.drawImage(pacman4up, pacman_x + 1, pacman_y + 1, this);
-                break;
-            default:
-                g2d.drawImage(pacman1, pacman_x + 1, pacman_y + 1, this);
-                break;
-        }
+    private void drawBomberman(Graphics2D g2d) {
+            g2d.drawImage(bomberman1, bomberman_x - bombermand_x/2, 
+               bomberman_y - bombermand_y/2, bombermand_x, bombermand_y, this );
+        
     }
-
-    private void drawPacmanDown(Graphics2D g2d) {
-
-        switch (pacmanAnimPos) {
-            case 1:
-                g2d.drawImage(pacman2down, pacman_x + 1, pacman_y + 1, this);
-                break;
-            case 2:
-                g2d.drawImage(pacman3down, pacman_x + 1, pacman_y + 1, this);
-                break;
-            case 3:
-                g2d.drawImage(pacman4down, pacman_x + 1, pacman_y + 1, this);
-                break;
-            default:
-                g2d.drawImage(pacman1, pacman_x + 1, pacman_y + 1, this);
-                break;
+    private void drawMovingBomberman(Graphics2D g2d) {
+        for (int i = 0; i < BOMBERMAN_MOVE_STEPS; i++){
+            bomberman_x += (req_dx * bombermand_x / BOMBERMAN_MOVE_STEPS);
+            bomberman_y += (req_dy * bombermand_y / BOMBERMAN_MOVE_STEPS);
+            drawBomberman(g2d);
         }
+        
     }
-
-    private void drawPacnanLeft(Graphics2D g2d) {
-
-        switch (pacmanAnimPos) {
-            case 1:
-                g2d.drawImage(pacman2left, pacman_x + 1, pacman_y + 1, this);
-                break;
-            case 2:
-                g2d.drawImage(pacman3left, pacman_x + 1, pacman_y + 1, this);
-                break;
-            case 3:
-                g2d.drawImage(pacman4left, pacman_x + 1, pacman_y + 1, this);
-                break;
-            default:
-                g2d.drawImage(pacman1, pacman_x + 1, pacman_y + 1, this);
-                break;
-        }
-    }
-
-    private void drawPacmanRight(Graphics2D g2d) {
-
-        switch (pacmanAnimPos) {
-            case 1:
-                g2d.drawImage(pacman2right, pacman_x + 1, pacman_y + 1, this);
-                break;
-            case 2:
-                g2d.drawImage(pacman3right, pacman_x + 1, pacman_y + 1, this);
-                break;
-            case 3:
-                g2d.drawImage(pacman4right, pacman_x + 1, pacman_y + 1, this);
-                break;
-            default:
-                g2d.drawImage(pacman1, pacman_x + 1, pacman_y + 1, this);
-                break;
-        }
-    }
-
+    
     private void drawMaze(Graphics2D g2d) {
 
         int x, y;
@@ -512,13 +442,11 @@ public class Board extends JPanel implements ActionListener {
                 random = currentSpeed;
             }
 
-            ghostSpeed[i] = validSpeeds[random];
+            ghostSpeed[i] = 0; //validSpeeds[random];
         }
 
-        pacman_x = 15;
-        pacman_y = 15;
-        pacmand_x = 0;
-        pacmand_y = 0;
+        bomberman_x = BLOCK_SIZE / 2;
+        bomberman_y = BLOCK_SIZE / 2;
         req_dx = 0;
         req_dy = 0;
         view_dx = -1;
@@ -529,19 +457,19 @@ public class Board extends JPanel implements ActionListener {
     private void loadImages() {
 
         ghost = new ImageIcon("images/ghost.png").getImage();
-        pacman1 = new ImageIcon("images/pacman.png").getImage();
-        pacman2up = new ImageIcon("images/up1.png").getImage();
-        pacman3up = new ImageIcon("images/up2.png").getImage();
-        pacman4up = new ImageIcon("images/up3.png").getImage();
-        pacman2down = new ImageIcon("images/down1.png").getImage();
-        pacman3down = new ImageIcon("images/down2.png").getImage();
-        pacman4down = new ImageIcon("images/down3.png").getImage();
-        pacman2left = new ImageIcon("images/left1.png").getImage();
-        pacman3left = new ImageIcon("images/left2.png").getImage();
-        pacman4left = new ImageIcon("images/left3.png").getImage();
-        pacman2right = new ImageIcon("images/right1.png").getImage();
-        pacman3right = new ImageIcon("images/right2.png").getImage();
-        pacman4right = new ImageIcon("images/right3.png").getImage();
+        bomberman1 = new ImageIcon("images/bomber_fixed.png").getImage();
+        bomberman2up = new ImageIcon("images/up1.png").getImage();
+        bomberman3up = new ImageIcon("images/up2.png").getImage();
+        bomberman4up = new ImageIcon("images/up3.png").getImage();
+        bomberman2down = new ImageIcon("images/down1.png").getImage();
+        bomberman3down = new ImageIcon("images/down2.png").getImage();
+        bomberman4down = new ImageIcon("images/down3.png").getImage();
+        bomberman2left = new ImageIcon("images/left1.png").getImage();
+        bomberman3left = new ImageIcon("images/left2.png").getImage();
+        bomberman4left = new ImageIcon("images/left3.png").getImage();
+        bomberman2right = new ImageIcon("images/right1.png").getImage();
+        bomberman3right = new ImageIcon("images/right2.png").getImage();
+        bomberman4right = new ImageIcon("images/right3.png").getImage();
 
     }
 
