@@ -50,6 +50,7 @@ public class Board extends JPanel implements ActionListener {
     private final int PAC_ANIM_DELAY = 2;
     private final int MAX_GHOSTS = 12;
     private final int BOMBERMAN_SPEED = 32;
+    private final int BOMBERMAN_MOVE_STEPS = 8;
 
     private int pacAnimCount = PAC_ANIM_DELAY;
     private int pacAnimDir = 1;
@@ -158,8 +159,8 @@ public class Board extends JPanel implements ActionListener {
 
         } else {
 
-            moveBomberman();
-            drawBomberman(g2d);
+            moveBomberman(g2d);
+            //drawBomberman(g2d);
             moveGhosts(g2d);
             checkMaze();
         }
@@ -294,16 +295,19 @@ public class Board extends JPanel implements ActionListener {
         g2d.drawImage(bomber, x, y, this);
     }
     
-    private void moveBomberman() {
+    private void moveBomberman(Graphics2D g2d) {
         // If bomber wants to walk
+        boolean will_move = false;
+        int d_x = 0;
+        int d_y = 0;
         if (req_dx != 0 || req_dy != 0) {
-            // We find the cell we are in
+            // We find the cell we are in    
             int cell_x = (int)Math.floor((double)bomberman_x / BLOCK_SIZE);
             int cell_y = (int)Math.floor((double)bomberman_y / BLOCK_SIZE);
             Map<String, Boolean> current = mapCells[cell_y][cell_x].getBorders();
             // We find out destination 
-            int d_x = (bomberman_x + BOMBERMAN_SPEED * req_dx);
-            int d_y = (bomberman_y + BOMBERMAN_SPEED * req_dy);
+            d_x = (bomberman_x + BOMBERMAN_SPEED * req_dx);
+            d_y = (bomberman_y + BOMBERMAN_SPEED * req_dy);
             int d_cell_x = (int)Math.floor((((double)d_x) / BLOCK_SIZE));
             int d_cell_y = (int)Math.floor((((double)d_y) / BLOCK_SIZE));
             // If try to go out of bounds
@@ -315,34 +319,27 @@ public class Board extends JPanel implements ActionListener {
             if(cell_x != d_cell_x || cell_y != d_cell_y){
                 // Going right
                 if(req_dx == 1){
-                    if (current.get("right_b") || destination.get("left_b")){
-                        bomberman_x = bomberman_x;
-                    } else {
-                        bomberman_x = d_x;
+                    if (!current.get("right_b") && !destination.get("left_b")){
+                        will_move = true;
                     }
                 }
                 // Going left
                 if(req_dx == -1){
-                    if(current.get("left_b") || destination.get("right_b")){
-                        bomberman_x = bomberman_x;
-                    } else {
-                        bomberman_x = d_x;
+                    if(!current.get("left_b") && !destination.get("right_b")){
+                        will_move = true;
                     }
                 }
                 // Going up
                 if(req_dy == -1){
-                    if(current.get("top_b") || destination.get("bottom_b")){
-                        bomberman_y = bomberman_y;
-                    } else {
-                        bomberman_y = d_y;
+                    if(!current.get("top_b") && !destination.get("bottom_b")){
+                        will_move = true;
                     }
                 }
                 // Going down
                 if(req_dy == 1){
-                    if(current.get("bottom_b") || destination.get("top_b")){
-                        bomberman_y = bomberman_y;
-                    } else {
+                    if(!current.get("bottom_b") && !destination.get("top_b")){
                         bomberman_y = d_y;
+                        will_move = true;
                     }
                 }
             } else {
@@ -352,11 +349,25 @@ public class Board extends JPanel implements ActionListener {
             view_dx = req_dx;
             view_dy = req_dy;
         }
+        if (will_move){
+            drawMovingBomberman(g2d);
+        } else{
+            drawBomberman(g2d);
+        }
     }
 
     private void drawBomberman(Graphics2D g2d) {
-        g2d.drawImage(bomberman1, bomberman_x - bombermand_x/2, 
-                bomberman_y - bombermand_y/2, bombermand_x, bombermand_y, this );
+            g2d.drawImage(bomberman1, bomberman_x - bombermand_x/2, 
+               bomberman_y - bombermand_y/2, bombermand_x, bombermand_y, this );
+        
+    }
+    private void drawMovingBomberman(Graphics2D g2d) {
+        for (int i = 0; i < BOMBERMAN_MOVE_STEPS; i++){
+            bomberman_x += (req_dx * bombermand_x / BOMBERMAN_MOVE_STEPS);
+            bomberman_y += (req_dy * bombermand_y / BOMBERMAN_MOVE_STEPS);
+            drawBomberman(g2d);
+        }
+        
     }
     
     private void drawMaze(Graphics2D g2d) {
