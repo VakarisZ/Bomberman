@@ -26,6 +26,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Map;
 import java.lang.Math;
+import java.util.LinkedList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -50,8 +51,8 @@ public class Board extends JPanel implements ActionListener {
     private final int PAC_ANIM_DELAY = 2;
     private final int MAX_GHOSTS = 12;
     private final int BOMBERMAN_SPEED = 32;
-    private final int BOMBERMAN_MOVE_STEPS = 8;
-
+    private final int BOMBERMAN_MOVE_STEPS = 4;
+    
     private int pacAnimCount = PAC_ANIM_DELAY;
     private int pacAnimDir = 1;
     private int bombermanAnimPos = 0;
@@ -59,6 +60,7 @@ public class Board extends JPanel implements ActionListener {
     private int pacsLeft, score;
     private int[] dx, dy;
     private int[] ghost_x, ghost_y, ghost_dx, ghost_dy, ghostSpeed;
+    private LinkedList<CustomSprite> sprites = new LinkedList<CustomSprite>();
 
     private Image ghost;
     private Image bomber;
@@ -70,6 +72,7 @@ public class Board extends JPanel implements ActionListener {
     private int bombermand_x = 32; // Dimensions of the bomberman
     private int bombermand_y = 32;
     private int req_dx, req_dy, view_dx, view_dy;
+    private CustomSprite bombie;
 
     private final short levelData[] = {
         19, 0, 26, 0, 18, 0, 18, 0, 18, 0, 18, 0, 18, 0, 22,
@@ -128,6 +131,10 @@ public class Board extends JPanel implements ActionListener {
         dy = new int[4];
         timer = new Timer(40, this);
         timer.start();
+        bomberman_x = BLOCK_SIZE / 2;
+        bomberman_y = BLOCK_SIZE / 2;
+        bombie = new CustomSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y, bomberman1, this);
+        sprites.add(bombie);
     }
 
     @Override
@@ -160,9 +167,13 @@ public class Board extends JPanel implements ActionListener {
         } else {
 
             moveBomberman(g2d);
-            //drawBomberman(g2d);
+            for(CustomSprite s : sprites){
+                s.Tick(g2d);
+            }
+            bombie.Tick(g2d);
             moveGhosts(g2d);
             checkMaze();
+            
         }
     }
 
@@ -338,7 +349,6 @@ public class Board extends JPanel implements ActionListener {
                 // Going down
                 if(req_dy == 1){
                     if(!current.get("bottom_b") && !destination.get("top_b")){
-                        bomberman_y = d_y;
                         will_move = true;
                     }
                 }
@@ -350,25 +360,26 @@ public class Board extends JPanel implements ActionListener {
             view_dy = req_dy;
         }
         if (will_move){
-            drawMovingBomberman(g2d);
-        } else{
-            drawBomberman(g2d);
+            bombie.Move(req_dx * bombermand_x, req_dy * bombermand_y, 
+                    BOMBERMAN_MOVE_STEPS);
+            bomberman_x += req_dx * bombermand_x;
+            bomberman_y += req_dy * bombermand_y;
         }
     }
 
-    private void drawBomberman(Graphics2D g2d) {
-            g2d.drawImage(bomberman1, bomberman_x - bombermand_x/2, 
-               bomberman_y - bombermand_y/2, bombermand_x, bombermand_y, this );
-        
-    }
-    private void drawMovingBomberman(Graphics2D g2d) {
-        for (int i = 0; i < BOMBERMAN_MOVE_STEPS; i++){
-            bomberman_x += (req_dx * bombermand_x / BOMBERMAN_MOVE_STEPS);
-            bomberman_y += (req_dy * bombermand_y / BOMBERMAN_MOVE_STEPS);
-            drawBomberman(g2d);
-        }
-        
-    }
+//    private void drawBomberman(Graphics2D g2d) {
+//            g2d.drawImage(bomberman1, bomberman_x - bombermand_x/2, 
+//               bomberman_y - bombermand_y/2, bombermand_x, bombermand_y, this );
+//        
+//    }
+//    private void drawMovingBomberman(Graphics2D g2d) {
+//        for (int i = 0; i < BOMBERMAN_MOVE_STEPS; i++){
+//            bomberman_x += (req_dx * bombermand_x / BOMBERMAN_MOVE_STEPS);
+//            bomberman_y += (req_dy * bombermand_y / BOMBERMAN_MOVE_STEPS);
+//            drawBomberman(g2d);
+//        }
+//        
+//    }
     
     private void drawMaze(Graphics2D g2d) {
 
@@ -458,18 +469,7 @@ public class Board extends JPanel implements ActionListener {
 
         ghost = new ImageIcon("images/ghost.png").getImage();
         bomberman1 = new ImageIcon("images/bomber_fixed.png").getImage();
-        bomberman2up = new ImageIcon("images/up1.png").getImage();
-        bomberman3up = new ImageIcon("images/up2.png").getImage();
-        bomberman4up = new ImageIcon("images/up3.png").getImage();
-        bomberman2down = new ImageIcon("images/down1.png").getImage();
-        bomberman3down = new ImageIcon("images/down2.png").getImage();
-        bomberman4down = new ImageIcon("images/down3.png").getImage();
-        bomberman2left = new ImageIcon("images/left1.png").getImage();
-        bomberman3left = new ImageIcon("images/left2.png").getImage();
-        bomberman4left = new ImageIcon("images/left3.png").getImage();
-        bomberman2right = new ImageIcon("images/right1.png").getImage();
-        bomberman3right = new ImageIcon("images/right2.png").getImage();
-        bomberman4right = new ImageIcon("images/right3.png").getImage();
+
 
     }
 
