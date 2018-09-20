@@ -49,7 +49,7 @@ public class Board extends JPanel implements ActionListener {
     private final int SCREEN_SIZE = N_BLOCKS * BLOCK_SIZE;
     private final int PAC_ANIM_DELAY = 2;
     private final int MAX_GHOSTS = 12;
-    private final int BOMBERMAN_SPEED = 6;
+    private final int BOMBERMAN_SPEED = 32;
 
     private int pacAnimCount = PAC_ANIM_DELAY;
     private int pacAnimDir = 1;
@@ -90,9 +90,9 @@ public class Board extends JPanel implements ActionListener {
     
     private final Cell[][] mapCells = Cell.getMapCells(N_BLOCKS, N_BLOCKS, BLOCK_SIZE);
     
-    private final int validSpeeds[] = {1, 2, 3, 4, 6, 8};
-    private final int maxSpeed = 6;
-    private int currentSpeed = 3;
+    private final int validSpeeds[] = {32};
+    private final int maxSpeed = 32;
+    private int currentSpeed = 32;
     private short[] screenData;
     private Timer timer;
 
@@ -315,8 +315,8 @@ public class Board extends JPanel implements ActionListener {
             if(cell_x != d_cell_x || cell_y != d_cell_y){
                 // Going right
                 if(req_dx == 1){
-                    if(current.get("right_b") || destination.get("left_b")){
-                        bomberman_x = mapCells[cell_y][cell_x].getX() + BLOCK_SIZE - 1;
+                    if (current.get("right_b") || destination.get("left_b")){
+                        bomberman_x = bomberman_x;
                     } else {
                         bomberman_x = d_x;
                     }
@@ -324,7 +324,7 @@ public class Board extends JPanel implements ActionListener {
                 // Going left
                 if(req_dx == -1){
                     if(current.get("left_b") || destination.get("right_b")){
-                        bomberman_x = mapCells[cell_y][cell_x].getX() + 1;
+                        bomberman_x = bomberman_x;
                     } else {
                         bomberman_x = d_x;
                     }
@@ -332,7 +332,7 @@ public class Board extends JPanel implements ActionListener {
                 // Going up
                 if(req_dy == -1){
                     if(current.get("top_b") || destination.get("bottom_b")){
-                        bomberman_y = mapCells[cell_y][cell_x].getY() + 1;
+                        bomberman_y = bomberman_y;
                     } else {
                         bomberman_y = d_y;
                     }
@@ -340,7 +340,7 @@ public class Board extends JPanel implements ActionListener {
                 // Going down
                 if(req_dy == 1){
                     if(current.get("bottom_b") || destination.get("top_b")){
-                        bomberman_y = mapCells[cell_y][cell_x].getY() + BLOCK_SIZE - 1;
+                        bomberman_y = bomberman_y;
                     } else {
                         bomberman_y = d_y;
                     }
@@ -431,11 +431,11 @@ public class Board extends JPanel implements ActionListener {
                 random = currentSpeed;
             }
 
-            ghostSpeed[i] = validSpeeds[random];
+            ghostSpeed[i] = 0; //validSpeeds[random];
         }
 
-        bomberman_x = 15;
-        bomberman_y = 15;
+        bomberman_x = BLOCK_SIZE / 2;
+        bomberman_y = BLOCK_SIZE / 2;
         req_dx = 0;
         req_dy = 0;
         view_dx = -1;
