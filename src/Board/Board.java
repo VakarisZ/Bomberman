@@ -50,12 +50,8 @@ public class Board extends JPanel implements ActionListener {
     private final int SCREEN_SIZE = N_BLOCKS * BLOCK_SIZE;
     private final int PAC_ANIM_DELAY = 2;
     private final int MAX_GHOSTS = 12;
-    private final int BOMBERMAN_SPEED = 32;
-    private final int BOMBERMAN_MOVE_STEPS = 4;
+    private final int BOMBERMAN_SPEED = 8;
     
-    private int pacAnimCount = PAC_ANIM_DELAY;
-    private int pacAnimDir = 1;
-    private int bombermanAnimPos = 0;
     private int N_GHOSTS = 1;
     private int pacsLeft, score;
     private int[] dx, dy;
@@ -170,7 +166,6 @@ public class Board extends JPanel implements ActionListener {
             for(CustomSprite s : sprites){
                 s.Tick(g2d);
             }
-            bombie.Tick(g2d);
             moveGhosts(g2d);
             checkMaze();
             
@@ -300,11 +295,6 @@ public class Board extends JPanel implements ActionListener {
 
         g2d.drawImage(ghost, x, y, this);
     }
-
-    private void drawBomber(Graphics2D g2d, int x, int y) {
-
-        g2d.drawImage(bomber, x, y, this);
-    }
     
     private void moveBomberman(Graphics2D g2d) {
         // If bomber wants to walk
@@ -353,17 +343,16 @@ public class Board extends JPanel implements ActionListener {
                     }
                 }
             } else {
-                bomberman_x = d_x;
-                bomberman_y = d_y;
+                will_move = true;
             }
             view_dx = req_dx;
             view_dy = req_dy;
         }
         if (will_move){
-            bombie.Move(req_dx * bombermand_x, req_dy * bombermand_y, 
-                    BOMBERMAN_MOVE_STEPS);
-            bomberman_x += req_dx * bombermand_x;
-            bomberman_y += req_dy * bombermand_y;
+            bombie.Move(req_dx, req_dy, 
+                    BOMBERMAN_SPEED);
+            bomberman_x += req_dx * BOMBERMAN_SPEED;
+            bomberman_y += req_dy * BOMBERMAN_SPEED;
         }
     }
 

@@ -37,9 +37,7 @@ public class CustomSprite {
     private int height, width, position_x, position_y;
     private Image image;
     private boolean moving = false;
-    private int animation_steps;
-    private int animation_speed;
-    private int current_animation_step;
+    private int movement_speed;
     private int move_x;
     private int move_y;
     private Graphics2D g2d;
@@ -59,38 +57,20 @@ public class CustomSprite {
         this.image = image;
     }
 
-    public void Move(int dx, int dy, int animation_steps) {
-        if (this.moving){
-            this.position_x += move_x * (animation_steps - current_animation_step) / animation_steps;
-            this.position_y += move_y * (animation_steps - current_animation_step) / animation_steps;
-        }
+    public void Move(int dx, int dy, int movement_speed) {
         this.move_x = dx;
         this.move_y = dy;
         this.moving = true;
-        this.animation_steps = animation_steps;
-        this.current_animation_step = 0;
+        this.movement_speed = movement_speed;
         
     }
 
     public void Tick(Graphics2D g2d) {
         this.g2d = g2d;
         if (this.moving) {
-            if (move_x != 0) {
-                this.position_x += move_x / animation_steps;
-                current_animation_step++;
-                if (current_animation_step >= animation_steps){
-                    this.moving = false;
-                }
-            }
-            else{
-                
-                this.position_y += move_y / animation_steps;
-                current_animation_step++;
-                if (current_animation_step >= animation_steps){
-                    this.moving = false;
-                }
-            
-            }
+            this.position_x += move_x * this.movement_speed;
+            this.position_y += move_y * this.movement_speed;
+            this.moving = false;
         }
         g2d.drawImage(image, position_x - width/2, 
                position_y - height/2, width, height, board);
