@@ -64,6 +64,12 @@ public class CustomSprite {
         this.movement_speed = movement_speed;
         
     }
+    
+    public void Move(int x, int y){
+        this.position_x = x;
+        this.position_y = y;
+        this.moving = false;
+    }
 
     public void Tick(Graphics2D g2d) {
         this.g2d = g2d;
@@ -74,5 +80,13 @@ public class CustomSprite {
         }
         g2d.drawImage(image, position_x - width/2, 
                position_y - height/2, width, height, board);
+    }
+    
+    public int getX(){
+        return this.position_x;
+    }
+    
+    public int getY(){
+        return this.position_y;
     }
 }

@@ -25,7 +25,7 @@ public class Bomberman extends JFrame {
         
         setTitle("Bomberman");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(470, 520);
+        setSize(500, 560);
         setLocationRelativeTo(null);
         setVisible(true);        
     }

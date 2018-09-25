@@ -32,6 +32,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import Board.Cell;
+import Board.Point;
 
 public class Board extends JPanel implements ActionListener {
 
@@ -50,7 +51,9 @@ public class Board extends JPanel implements ActionListener {
     private final int SCREEN_SIZE = N_BLOCKS * BLOCK_SIZE;
     private final int PAC_ANIM_DELAY = 2;
     private final int MAX_GHOSTS = 12;
-    private final int BOMBERMAN_SPEED = 8;
+    private final int BOMBERMAN_SPEED = 3;
+    // Determines the dimensions of bomberman collision detection 
+    private final int BOMBERMAN_SIZE = 10;
     
     private int N_GHOSTS = 1;
     private int pacsLeft, score;
@@ -69,24 +72,6 @@ public class Board extends JPanel implements ActionListener {
     private int bombermand_y = 32;
     private int req_dx, req_dy, view_dx, view_dy;
     private CustomSprite bombie;
-
-    private final short levelData[] = {
-        19, 0, 26, 0, 18, 0, 18, 0, 18, 0, 18, 0, 18, 0, 22,
-        21, 0, 0, 0, 17, 16, 16, 16, 16, 16, 16, 16, 16, 16, 20,
-        21, 0, 0, 0, 17, 16, 16, 16, 16, 16, 16, 16, 16, 16, 20,
-        21, 0, 0, 0, 17, 16, 16, 24, 16, 16, 16, 16, 16, 16, 20,
-        17, 18, 18, 18, 16, 16, 20, 0, 17, 16, 16, 16, 16, 16, 20,
-        17, 16, 16, 16, 16, 16, 20, 0, 17, 16, 16, 16, 16, 24, 20,
-        25, 16, 16, 16, 24, 24, 28, 0, 25, 24, 24, 16, 20, 0, 21,
-        1, 17, 16, 20, 0, 0, 0, 0, 0, 0, 0, 17, 20, 0, 21,
-        1, 17, 16, 16, 18, 18, 22, 0, 19, 18, 18, 16, 20, 0, 21,
-        1, 17, 16, 16, 16, 16, 20, 0, 17, 16, 16, 16, 20, 0, 21,
-        1, 17, 16, 16, 16, 16, 20, 0, 17, 16, 16, 16, 20, 0, 21,
-        1, 17, 16, 16, 16, 16, 16, 18, 16, 16, 16, 16, 20, 0, 21,
-        1, 17, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 20, 0, 21,
-        1, 25, 24, 24, 24, 24, 24, 24, 24, 24, 16, 16, 16, 18, 20,
-        9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 25, 24, 24, 24, 28
-    };
     
     private final Cell[][] mapCells = Cell.getMapCells(N_BLOCKS, N_BLOCKS, BLOCK_SIZE);
     
@@ -295,67 +280,99 @@ public class Board extends JPanel implements ActionListener {
 
         g2d.drawImage(ghost, x, y, this);
     }
-    
+
     private void moveBomberman(Graphics2D g2d) {
-        // If bomber wants to walk
-        boolean will_move = false;
+        // Bomberman's center point
+        Point bp = new Point(bombie.getX(), bombie.getY());
         int d_x = 0;
         int d_y = 0;
-        if (req_dx != 0 || req_dy != 0) {
-            // We find the cell we are in    
-            int cell_x = (int)Math.floor((double)bomberman_x / BLOCK_SIZE);
-            int cell_y = (int)Math.floor((double)bomberman_y / BLOCK_SIZE);
-            Map<String, Boolean> current = mapCells[cell_y][cell_x].getBorders();
-            // We find out destination 
-            d_x = (bomberman_x + BOMBERMAN_SPEED * req_dx);
-            d_y = (bomberman_y + BOMBERMAN_SPEED * req_dy);
-            int d_cell_x = (int)Math.floor((((double)d_x) / BLOCK_SIZE));
-            int d_cell_y = (int)Math.floor((((double)d_y) / BLOCK_SIZE));
-            // If try to go out of bounds
-            if(d_cell_x < 0 || d_cell_x == N_BLOCKS || d_cell_y < 0 || d_cell_y == N_BLOCKS){
-                return;
-            }
-            Map<String, Boolean> destination = mapCells[d_cell_y][d_cell_x].getBorders();
-            // If destination cell is not the same as origin's
-            if(cell_x != d_cell_x || cell_y != d_cell_y){
-                // Going right
-                if(req_dx == 1){
-                    if (!current.get("right_b") && !destination.get("left_b")){
-                        will_move = true;
-                    }
-                }
-                // Going left
-                if(req_dx == -1){
-                    if(!current.get("left_b") && !destination.get("right_b")){
-                        will_move = true;
-                    }
-                }
-                // Going up
-                if(req_dy == -1){
-                    if(!current.get("top_b") && !destination.get("bottom_b")){
-                        will_move = true;
-                    }
-                }
-                // Going down
-                if(req_dy == 1){
-                    if(!current.get("bottom_b") && !destination.get("top_b")){
-                        will_move = true;
-                    }
-                }
-            } else {
-                will_move = true;
-            }
-            view_dx = req_dx;
-            view_dy = req_dy;
+        // Create 4 collision detection points
+        Point[] points = Point.getCollisionDetectionPoints(bp.x, 
+                bp.y, BOMBERMAN_SIZE);
+        Point p1, p2 = new Point(bp.x, bp.y);
+        // If going right we take right points
+        if (req_dx == 1){
+            p1 = pointMovement(points[1]);
+            p2 = pointMovement(points[2]);
+        } else if(req_dx == -1) { // If moving left
+            p1 = pointMovement(points[0]);
+            p2 = pointMovement(points[3]);
+        } else if(req_dy == 1) { // If moving down
+            p1 = pointMovement(points[2]);
+            p2 = pointMovement(points[3]);
+        } else if(req_dy == -1){ // If moving up
+            p1 = pointMovement(points[0]);
+            p2 = pointMovement(points[1]);
+        } else {
+            return;
         }
-        if (will_move){
-            bombie.Move(req_dx, req_dy, 
-                    BOMBERMAN_SPEED);
-            bomberman_x += req_dx * BOMBERMAN_SPEED;
-            bomberman_y += req_dy * BOMBERMAN_SPEED;
-        }
+        Point destination = Point.closerTo(p1, p2);
+        bp.x = bp.x + destination.x;
+        bp.y = bp.y + destination.y;
+        bombie.Move(bp.x, bp.y);
     }
-
+    
+    // Returns the biggest possible movement of one point in offsets
+    // Eg. if point x,y could move 3 to the left it returns Point(-3,0)
+    private Point pointMovement(Point p){
+        int x = p.x;
+        int y = p.y;
+        // We find the cell we are in    
+        int cell_x = (int)Math.floor((double)x / BLOCK_SIZE);
+        int cell_y = (int)Math.floor((double)y / BLOCK_SIZE);
+        Map<String, Boolean> current = mapCells[cell_y][cell_x].getBorders();
+        // We find out destination 
+        int d_x, d_y = 0;
+        d_x = (x + BOMBERMAN_SPEED * req_dx);
+        d_y = (y + BOMBERMAN_SPEED * req_dy);
+        int d_cell_x = (int)Math.floor((((double)d_x) / BLOCK_SIZE));
+        int d_cell_y = (int)Math.floor((((double)d_y) / BLOCK_SIZE));
+        // If try to go out of bounds
+        if(d_cell_x < 0 || d_cell_x == N_BLOCKS || d_cell_y < 0 || d_cell_y == N_BLOCKS){
+            return new Point(0,0);
+        }
+        
+        Map<String, Boolean> destination = mapCells[d_cell_y][d_cell_x].getBorders();
+        // If destination cell is not the same as origin's
+        if(cell_x != d_cell_x || cell_y != d_cell_y){
+            // Going right
+            if(req_dx == 1){
+                if(current.get("right_b") || destination.get("left_b")){
+                    x = mapCells[cell_y][cell_x].getX() + BLOCK_SIZE - 1;
+                } else {
+                    x = d_x;
+                }
+            }
+            // Going left
+            if(req_dx == -1){
+                if(current.get("left_b") || destination.get("right_b")){
+                    x = mapCells[cell_y][cell_x].getX() + 1;
+                } else {
+                    x = d_x;
+                }
+            }
+            // Going up
+            if(req_dy == -1){
+                if(current.get("top_b") || destination.get("bottom_b")){
+                    y = mapCells[cell_y][cell_x].getY() + 1;
+                } else {
+                    y = d_y;
+                }
+            }
+            // Going down
+            if(req_dy == 1){
+                if(current.get("bottom_b") || destination.get("top_b")){
+                    y = mapCells[cell_y][cell_x].getY() + BLOCK_SIZE - 1;
+                } else {
+                    y = d_y;
+                }
+            }
+        } else {
+            x = d_x;
+            y = d_y;
+        }
+        return Point.distance(new Point(x,y), p);
+    }
 //    private void drawBomberman(Graphics2D g2d) {
 //            g2d.drawImage(bomberman1, bomberman_x - bombermand_x/2, 
 //               bomberman_y - bombermand_y/2, bombermand_x, bombermand_y, this );
@@ -416,10 +433,6 @@ public class Board extends JPanel implements ActionListener {
     private void initLevel() {
 
         int i;
-        for (i = 0; i < N_BLOCKS * N_BLOCKS; i++) {
-            screenData[i] = levelData[i];
-        }
-
         continueLevel();
     }
 
