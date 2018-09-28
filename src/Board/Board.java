@@ -3,13 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 /**
  *
  * @author Vakaris
  */
 package Board;
-        
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -33,6 +32,13 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 import Board.Cell;
 import Board.Point;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Board extends JPanel implements ActionListener {
 
@@ -54,7 +60,7 @@ public class Board extends JPanel implements ActionListener {
     private final int BOMBERMAN_SPEED = 3;
     // Determines the dimensions of bomberman collision detection 
     private final int BOMBERMAN_SIZE = 10;
-    
+
     private int N_GHOSTS = 1;
     private int pacsLeft, score;
     private int[] dx, dy;
@@ -72,9 +78,11 @@ public class Board extends JPanel implements ActionListener {
     private int bombermand_y = 32;
     private int req_dx, req_dy, view_dx, view_dy;
     private CustomSprite bombie;
-    
+    private Socket server_socket;
+    private DataInputStream server_in;
+
     private final Cell[][] mapCells = Cell.getMapCells(N_BLOCKS, N_BLOCKS, BLOCK_SIZE);
-    
+
     private final int validSpeeds[] = {32};
     private final int maxSpeed = 32;
     private int currentSpeed = 32;
@@ -87,15 +95,31 @@ public class Board extends JPanel implements ActionListener {
         initVariables();
         initBoard();
     }
-    
+
+    private void initConnection() throws IOException {
+        server_socket = null;
+        try {
+            server_socket = new Socket("localhost", 4000);
+        } catch (IOException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        server_in = new DataInputStream(server_socket.getInputStream());
+
+    }
+
     private void initBoard() {
-        
+
         addKeyListener(new TAdapter());
 
         setFocusable(true);
 
         setBackground(Color.black);
-        setDoubleBuffered(true);        
+        setDoubleBuffered(true);
+        try {
+            initConnection();
+        } catch (IOException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     private void initVariables() {
@@ -126,7 +150,7 @@ public class Board extends JPanel implements ActionListener {
     }
 
     private void doAnim() {
-        
+
 //        pacAnimCount--;
 //
 //        if (pacAnimCount <= 0) {
@@ -140,20 +164,28 @@ public class Board extends JPanel implements ActionListener {
     }
 
     private void playGame(Graphics2D g2d) {
+        byte message = 4;
+        try {
+            message = server_in.readByte();
+        } catch (IOException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        switch (message) {
+            case 0:
+                if (dying) {
 
-        if (dying) {
+                    death();
 
-            death();
+                } else {
 
-        } else {
+                    moveBomberman(g2d);
+                    for (CustomSprite s : sprites) {
+                        s.Tick(g2d);
+                    }
+                    moveGhosts(g2d);
+                    checkMaze();
 
-            moveBomberman(g2d);
-            for(CustomSprite s : sprites){
-                s.Tick(g2d);
-            }
-            moveGhosts(g2d);
-            checkMaze();
-            
+                }
         }
     }
 
@@ -287,20 +319,20 @@ public class Board extends JPanel implements ActionListener {
         int d_x = 0;
         int d_y = 0;
         // Create 4 collision detection points
-        Point[] points = Point.getCollisionDetectionPoints(bp.x, 
+        Point[] points = Point.getCollisionDetectionPoints(bp.x,
                 bp.y, BOMBERMAN_SIZE);
         Point p1, p2 = new Point(bp.x, bp.y);
         // If going right we take right points
-        if (req_dx == 1){
+        if (req_dx == 1) {
             p1 = pointMovement(points[1]);
             p2 = pointMovement(points[2]);
-        } else if(req_dx == -1) { // If moving left
+        } else if (req_dx == -1) { // If moving left
             p1 = pointMovement(points[0]);
             p2 = pointMovement(points[3]);
-        } else if(req_dy == 1) { // If moving down
+        } else if (req_dy == 1) { // If moving down
             p1 = pointMovement(points[2]);
             p2 = pointMovement(points[3]);
-        } else if(req_dy == -1){ // If moving up
+        } else if (req_dy == -1) { // If moving up
             p1 = pointMovement(points[0]);
             p2 = pointMovement(points[1]);
         } else {
@@ -311,57 +343,57 @@ public class Board extends JPanel implements ActionListener {
         bp.y = bp.y + destination.y;
         bombie.Move(bp.x, bp.y);
     }
-    
+
     // Returns the biggest possible movement of one point in offsets
     // Eg. if point x,y could move 3 to the left it returns Point(-3,0)
-    private Point pointMovement(Point p){
+    private Point pointMovement(Point p) {
         int x = p.x;
         int y = p.y;
         // We find the cell we are in    
-        int cell_x = (int)Math.floor((double)x / BLOCK_SIZE);
-        int cell_y = (int)Math.floor((double)y / BLOCK_SIZE);
+        int cell_x = (int) Math.floor((double) x / BLOCK_SIZE);
+        int cell_y = (int) Math.floor((double) y / BLOCK_SIZE);
         Map<String, Boolean> current = mapCells[cell_y][cell_x].getBorders();
         // We find out destination 
         int d_x, d_y = 0;
         d_x = (x + BOMBERMAN_SPEED * req_dx);
         d_y = (y + BOMBERMAN_SPEED * req_dy);
-        int d_cell_x = (int)Math.floor((((double)d_x) / BLOCK_SIZE));
-        int d_cell_y = (int)Math.floor((((double)d_y) / BLOCK_SIZE));
+        int d_cell_x = (int) Math.floor((((double) d_x) / BLOCK_SIZE));
+        int d_cell_y = (int) Math.floor((((double) d_y) / BLOCK_SIZE));
         // If try to go out of bounds
-        if(d_cell_x < 0 || d_cell_x == N_BLOCKS || d_cell_y < 0 || d_cell_y == N_BLOCKS){
-            return new Point(0,0);
+        if (d_cell_x < 0 || d_cell_x == N_BLOCKS || d_cell_y < 0 || d_cell_y == N_BLOCKS) {
+            return new Point(0, 0);
         }
-        
+
         Map<String, Boolean> destination = mapCells[d_cell_y][d_cell_x].getBorders();
         // If destination cell is not the same as origin's
-        if(cell_x != d_cell_x || cell_y != d_cell_y){
+        if (cell_x != d_cell_x || cell_y != d_cell_y) {
             // Going right
-            if(req_dx == 1){
-                if(current.get("right_b") || destination.get("left_b")){
+            if (req_dx == 1) {
+                if (current.get("right_b") || destination.get("left_b")) {
                     x = mapCells[cell_y][cell_x].getX() + BLOCK_SIZE - 1;
                 } else {
                     x = d_x;
                 }
             }
             // Going left
-            if(req_dx == -1){
-                if(current.get("left_b") || destination.get("right_b")){
+            if (req_dx == -1) {
+                if (current.get("left_b") || destination.get("right_b")) {
                     x = mapCells[cell_y][cell_x].getX() + 1;
                 } else {
                     x = d_x;
                 }
             }
             // Going up
-            if(req_dy == -1){
-                if(current.get("top_b") || destination.get("bottom_b")){
+            if (req_dy == -1) {
+                if (current.get("top_b") || destination.get("bottom_b")) {
                     y = mapCells[cell_y][cell_x].getY() + 1;
                 } else {
                     y = d_y;
                 }
             }
             // Going down
-            if(req_dy == 1){
-                if(current.get("bottom_b") || destination.get("top_b")){
+            if (req_dy == 1) {
+                if (current.get("bottom_b") || destination.get("top_b")) {
                     y = mapCells[cell_y][cell_x].getY() + BLOCK_SIZE - 1;
                 } else {
                     y = d_y;
@@ -371,7 +403,7 @@ public class Board extends JPanel implements ActionListener {
             x = d_x;
             y = d_y;
         }
-        return Point.distance(new Point(x,y), p);
+        return Point.distance(new Point(x, y), p);
     }
 //    private void drawBomberman(Graphics2D g2d) {
 //            g2d.drawImage(bomberman1, bomberman_x - bombermand_x/2, 
@@ -386,7 +418,7 @@ public class Board extends JPanel implements ActionListener {
 //        }
 //        
 //    }
-    
+
     private void drawMaze(Graphics2D g2d) {
 
         int x, y;
@@ -399,21 +431,21 @@ public class Board extends JPanel implements ActionListener {
                 int i = y / BLOCK_SIZE;
                 int j = x / BLOCK_SIZE;
                 Cell cell = mapCells[i][j];
-                if ((cell.getBorders().get("top_b"))) { 
-                    g2d.drawLine(x, y, x + BLOCK_SIZE -1, y);
+                if ((cell.getBorders().get("top_b"))) {
+                    g2d.drawLine(x, y, x + BLOCK_SIZE - 1, y);
                 }
 
-                if ((cell.getBorders().get("right_b"))) { 
-                    g2d.drawLine(x + BLOCK_SIZE - 1, y, 
-                                 x + BLOCK_SIZE - 1, y + BLOCK_SIZE - 1);
+                if ((cell.getBorders().get("right_b"))) {
+                    g2d.drawLine(x + BLOCK_SIZE - 1, y,
+                            x + BLOCK_SIZE - 1, y + BLOCK_SIZE - 1);
                 }
 
-                if ((cell.getBorders().get("bottom_b"))) { 
+                if ((cell.getBorders().get("bottom_b"))) {
                     g2d.drawLine(x, y + BLOCK_SIZE - 1, x + BLOCK_SIZE - 1,
                             y + BLOCK_SIZE - 1);
                 }
 
-                if ((cell.getBorders().get("left_b"))) { 
+                if ((cell.getBorders().get("left_b"))) {
                     g2d.drawLine(x, y, x, y + BLOCK_SIZE - 1);
                 }
 
@@ -444,8 +476,8 @@ public class Board extends JPanel implements ActionListener {
 
         for (i = 0; i < N_GHOSTS; i++) {
 
-            ghost_y[i] = N_BLOCKS * BLOCK_SIZE -1;
-            ghost_x[i] = N_BLOCKS * BLOCK_SIZE -1;
+            ghost_y[i] = N_BLOCKS * BLOCK_SIZE - 1;
+            ghost_x[i] = N_BLOCKS * BLOCK_SIZE - 1;
             ghost_dy[i] = 0;
             ghost_dx[i] = dx;
             dx = -dx;
@@ -471,7 +503,6 @@ public class Board extends JPanel implements ActionListener {
 
         ghost = new ImageIcon("images/ghost.png").getImage();
         bomberman1 = new ImageIcon("images/bomber_fixed.png").getImage();
-
 
     }
 
@@ -515,19 +546,19 @@ public class Board extends JPanel implements ActionListener {
                 if (key == KeyEvent.VK_LEFT) {
                     req_dx = -1;
                     req_dy = 0;
-                    System.out.println("Key pressed"+e);
+                    System.out.println("Key pressed" + e);
                 } else if (key == KeyEvent.VK_RIGHT) {
                     req_dx = 1;
                     req_dy = 0;
-                    System.out.println("Key pressed"+e);
+                    System.out.println("Key pressed" + e);
                 } else if (key == KeyEvent.VK_UP) {
                     req_dx = 0;
                     req_dy = -1;
-                    System.out.println("Key pressed"+e);
+                    System.out.println("Key pressed" + e);
                 } else if (key == KeyEvent.VK_DOWN) {
                     req_dx = 0;
                     req_dy = 1;
-                    System.out.println("Key pressed"+e);
+                    System.out.println("Key pressed" + e);
                 } else if (key == KeyEvent.VK_ESCAPE && timer.isRunning()) {
                     inGame = false;
                 } else if (key == KeyEvent.VK_PAUSE) {
@@ -565,4 +596,3 @@ public class Board extends JPanel implements ActionListener {
         repaint();
     }
 }
-
