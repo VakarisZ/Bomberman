@@ -68,7 +68,7 @@ public class Mariadb {
         }
         return rs;
     }
-    
+
     private static void ExecuteUpdate(String query) {
         try {
             Statement stmt = con.createStatement();
@@ -77,21 +77,22 @@ public class Mariadb {
             Logger.getLogger(Mariadb.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     private static void ExecuteUpdate(String[] queries) {
-        for (int i = 0; i < queries.length; i++){
+        for (int i = 0; i < queries.length; i++) {
             ExecuteUpdate(queries[i]);
         }
     }
-    
+
     public static void InitDatabase() {
         String create_usertable = loadResource("queries/usertable.sql");
         String drop_table = "DROP TABLE IF EXISTS `users`;";
         ExecuteQuery(drop_table);
         ExecuteUpdate(create_usertable);
-        
+
     }
-    public static String loadResource(String filename){
+
+    public static String loadResource(String filename) {
         FileInputStream f = null;
         try {
             f = new FileInputStream(filename);
@@ -99,27 +100,27 @@ public class Mariadb {
             Logger.getLogger(Mariadb.class.getName()).log(Level.SEVERE, null, ex);
         }
         return convertStreamToString(f);
-        
+
     }
-    
+
     static String convertStreamToString(java.io.InputStream is) {
-    if (is == null) {
-        return "";
+        if (is == null) {
+            return "";
+        }
+
+        java.util.Scanner s = new java.util.Scanner(is);
+        s.useDelimiter("\\A");
+
+        String streamString = s.hasNext() ? s.next() : "";
+
+        s.close();
+
+        return streamString;
     }
 
-    java.util.Scanner s = new java.util.Scanner(is);
-    s.useDelimiter("\\A");
-
-    String streamString = s.hasNext() ? s.next() : "";
-
-    s.close();
-
-    return streamString;
-}
-    
-    public static void testDB(){
+    public static void testDB() {
         String test_data = loadResource("queries/filling_users.sql");
-        String [] entries = test_data.split("\n");
+        String[] entries = test_data.split("\n");
         ExecuteUpdate(entries);
         ResultSet rs = ExecuteQuery("select * from users");
         try {
