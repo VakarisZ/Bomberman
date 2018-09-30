@@ -5,6 +5,7 @@
  */
 package ServerBackend;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -27,9 +28,10 @@ public class Connector {
             while (true) {
 
                 DataOutputStream data_out = new DataOutputStream(socket.getOutputStream());
+                DataInputStream data_in = new DataInputStream(socket.getInputStream());
                 data_out.writeByte(0);
                 data_out.flush();
-                TimeUnit.SECONDS.sleep(1);
+                TimeUnit.MILLISECONDS.sleep(35);
                 
 
             }
