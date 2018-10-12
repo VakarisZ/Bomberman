@@ -1,5 +1,6 @@
 package Board.Obstacles;
 
+import java.io.Console;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,6 +48,9 @@ public class AbstractFactoryTests {
                         Logger.getLogger(AbstractFactoryTests.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
+                System.out.println(bomb instanceof SmallBomb);
+                System.out.println(bomb instanceof Bomb);
+                System.out.println(bomb instanceof Obstacle);
             }
 
             userInput = scanner.nextLine();
