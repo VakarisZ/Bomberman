@@ -39,6 +39,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import Movement.BombermanMovement;
 
 public class Board extends JPanel implements ActionListener {
 
@@ -177,8 +178,11 @@ public class Board extends JPanel implements ActionListener {
                     death();
 
                 } else {
-
-                    moveBomberman(g2d);
+                    // Create new movement for bomberman
+                    BombermanMovement bombermanMovement = new BombermanMovement(req_dx, req_dy,
+                    BOMBERMAN_SPEED, bombie, mapCells, BLOCK_SIZE, N_BLOCKS, BOMBERMAN_SIZE);
+                    bombermanMovement.move();
+                    
                     for (CustomSprite s : sprites) {
                         s.Tick(g2d);
                     }
@@ -313,98 +317,6 @@ public class Board extends JPanel implements ActionListener {
         g2d.drawImage(ghost, x, y, this);
     }
 
-    private void moveBomberman(Graphics2D g2d) {
-        // Bomberman's center point
-        Point bp = new Point(bombie.getX(), bombie.getY());
-        int d_x = 0;
-        int d_y = 0;
-        // Create 4 collision detection points
-        Point[] points = Point.getCollisionDetectionPoints(bp.x,
-                bp.y, BOMBERMAN_SIZE);
-        Point p1, p2 = new Point(bp.x, bp.y);
-        // If going right we take right points
-        if (req_dx == 1) {
-            p1 = pointMovement(points[1]);
-            p2 = pointMovement(points[2]);
-        } else if (req_dx == -1) { // If moving left
-            p1 = pointMovement(points[0]);
-            p2 = pointMovement(points[3]);
-        } else if (req_dy == 1) { // If moving down
-            p1 = pointMovement(points[2]);
-            p2 = pointMovement(points[3]);
-        } else if (req_dy == -1) { // If moving up
-            p1 = pointMovement(points[0]);
-            p2 = pointMovement(points[1]);
-        } else {
-            return;
-        }
-        Point destination = Point.closerTo(p1, p2);
-        bp.x = bp.x + destination.x;
-        bp.y = bp.y + destination.y;
-        bombie.Move(bp.x, bp.y);
-    }
-
-    // Returns the biggest possible movement of one point in offsets
-    // Eg. if point x,y could move 3 to the left it returns Point(-3,0)
-    private Point pointMovement(Point p) {
-        int x = p.x;
-        int y = p.y;
-        // We find the cell we are in    
-        int cell_x = (int) Math.floor((double) x / BLOCK_SIZE);
-        int cell_y = (int) Math.floor((double) y / BLOCK_SIZE);
-        Map<String, Boolean> current = mapCells[cell_y][cell_x].getBorders();
-        // We find out destination 
-        int d_x, d_y = 0;
-        d_x = (x + BOMBERMAN_SPEED * req_dx);
-        d_y = (y + BOMBERMAN_SPEED * req_dy);
-        int d_cell_x = (int) Math.floor((((double) d_x) / BLOCK_SIZE));
-        int d_cell_y = (int) Math.floor((((double) d_y) / BLOCK_SIZE));
-        // If try to go out of bounds
-        if (d_cell_x < 0 || d_cell_x == N_BLOCKS || d_cell_y < 0 || d_cell_y == N_BLOCKS) {
-            return new Point(0, 0);
-        }
-
-        Map<String, Boolean> destination = mapCells[d_cell_y][d_cell_x].getBorders();
-        // If destination cell is not the same as origin's
-        if (cell_x != d_cell_x || cell_y != d_cell_y) {
-            // Going right
-            if (req_dx == 1) {
-                if (current.get("right_b") || destination.get("left_b")) {
-                    x = mapCells[cell_y][cell_x].getX() + BLOCK_SIZE - 1;
-                } else {
-                    x = d_x;
-                }
-            }
-            // Going left
-            if (req_dx == -1) {
-                if (current.get("left_b") || destination.get("right_b")) {
-                    x = mapCells[cell_y][cell_x].getX() + 1;
-                } else {
-                    x = d_x;
-                }
-            }
-            // Going up
-            if (req_dy == -1) {
-                if (current.get("top_b") || destination.get("bottom_b")) {
-                    y = mapCells[cell_y][cell_x].getY() + 1;
-                } else {
-                    y = d_y;
-                }
-            }
-            // Going down
-            if (req_dy == 1) {
-                if (current.get("bottom_b") || destination.get("top_b")) {
-                    y = mapCells[cell_y][cell_x].getY() + BLOCK_SIZE - 1;
-                } else {
-                    y = d_y;
-                }
-            }
-        } else {
-            x = d_x;
-            y = d_y;
-        }
-        return Point.distance(new Point(x, y), p);
-    }
 //    private void drawBomberman(Graphics2D g2d) {
 //            g2d.drawImage(bomberman1, bomberman_x - bombermand_x/2, 
 //               bomberman_y - bombermand_y/2, bombermand_x, bombermand_y, this );
@@ -546,19 +458,15 @@ public class Board extends JPanel implements ActionListener {
                 if (key == KeyEvent.VK_LEFT) {
                     req_dx = -1;
                     req_dy = 0;
-                    System.out.println("Key pressed" + e);
                 } else if (key == KeyEvent.VK_RIGHT) {
                     req_dx = 1;
                     req_dy = 0;
-                    System.out.println("Key pressed" + e);
                 } else if (key == KeyEvent.VK_UP) {
                     req_dx = 0;
                     req_dy = -1;
-                    System.out.println("Key pressed" + e);
                 } else if (key == KeyEvent.VK_DOWN) {
                     req_dx = 0;
                     req_dy = 1;
-                    System.out.println("Key pressed" + e);
                 } else if (key == KeyEvent.VK_ESCAPE && timer.isRunning()) {
                     inGame = false;
                 } else if (key == KeyEvent.VK_PAUSE) {
@@ -585,7 +493,6 @@ public class Board extends JPanel implements ActionListener {
                     || key == KeyEvent.VK_UP || key == KeyEvent.VK_DOWN) {
                 req_dx = 0;
                 req_dy = 0;
-                System.out.println("Worked");
             }
         }
     }
