@@ -19,6 +19,38 @@ import java.util.logging.Logger;
  *
  * @author mati
  */
+class Multi extends Thread {
+
+    private Socket s = null;
+    DataInputStream infromClient;
+
+    Multi() throws IOException {
+
+    }
+
+    Multi(Socket s) throws IOException {
+        this.s = s;
+        infromClient = new DataInputStream(s.getInputStream());
+    }
+
+    public void run() {
+
+        String SQL = new String();
+        try {
+            SQL = infromClient.readUTF();
+        } catch (IOException ex) {
+            Logger.getLogger(Multi.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.out.println("Query: " + SQL);
+        try {
+            System.out.println("Socket Closing");
+            s.close();
+        } catch (IOException ex) {
+            Logger.getLogger(Multi.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+}
+
 public class Connector {
 
     public static void main(String[] args) throws IOException {
@@ -32,7 +64,6 @@ public class Connector {
                 data_out.writeByte(0);
                 data_out.flush();
                 TimeUnit.MILLISECONDS.sleep(35);
-                
 
             }
         } catch (InterruptedException ex) {
