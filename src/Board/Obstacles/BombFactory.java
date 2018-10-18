@@ -10,16 +10,15 @@ package Board.Obstacles;
 public class BombFactory extends ObstacleFactory {
 
     @Override
-    public Bomb createObstacle(String type) {
+    public Bomb createObstacle(ObstacleType obsType) {
 
         Bomb obs = null;
 
-        switch (type) {
-            case "BigBomb":
+        switch (obsType) {
+            case BigBomb:
                 obs = new BigBomb(false, true, 4, 4.0f);
-                System.out.println("weed");
                 break;
-            case "SmallBomb":
+            case SmallBomb:
                 obs = new SmallBomb(false, true, 2, 2.0f);
                 break;
         }

@@ -27,18 +27,18 @@ public class AbstractFactoryTests {
         System.out.println("Select : bi(G) bomb / (S)mall bomb / e(X)it");
         userInput = scanner.nextLine();
 
-        while (!userInput.equals("X")) {
+        while (!userInput.toUpperCase().equals("X")) {
 
-            if (userInput.equals("G") || userInput.equals("S")) {
+            if (userInput.toUpperCase().equals("G") || userInput.toUpperCase().equals("S")) {
                 Bomb bomb = null;
                 
                 //BombFactory bfact = new BombFactory();
                 
-                if (userInput.equals("G")) {
-                    bomb = (Bomb) bombFactory.createObstacle("BigBomb");
+                if (userInput.toUpperCase().equals("G")) {
+                    bomb = (Bomb) bombFactory.createObstacle(ObstacleType.BigBomb);
                     //bomb = bfact.createObstacle("BigBomb");
-                } else if (userInput.equals("S")) {
-                    bomb = (Bomb) bombFactory.createObstacle("SmallBomb");
+                } else if (userInput.toUpperCase().equals("S")) {
+                    bomb = (Bomb) bombFactory.createObstacle(ObstacleType.SmallBomb);
                 }
                 
                 if (bomb != null) {

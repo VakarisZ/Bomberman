@@ -8,7 +8,7 @@ package Board.Obstacles;
 public class BoxFactory extends ObstacleFactory{
 
     @Override
-    public Box createObstacle(String type) {
+    public Box createObstacle(ObstacleType obsType) {
         return new Box(true, false, 1);
     }
     

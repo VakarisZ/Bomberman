@@ -11,5 +11,5 @@ public abstract class ObstacleFactory {
      * @param type
      * @return 
      */
-    public abstract Obstacle createObstacle(String type) ;
+    public abstract Obstacle createObstacle(ObstacleType ot) ;
 }
