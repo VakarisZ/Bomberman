@@ -79,6 +79,7 @@ public class ClientBoard extends JPanel implements ActionListener  {
     
     
     private boolean inGame = false;
+    private boolean inLevel = false;
     private boolean dying = false;
 
     
@@ -177,10 +178,8 @@ public class ClientBoard extends JPanel implements ActionListener  {
         }
         server_in = new DataInputStream(server_socket.getInputStream());
         server_out = new DataOutputStream(server_socket.getOutputStream());
-        server_out.writeChars(client_id);
-        server_out.flush();
-        
-        
+        server_out.writeUTF(client_id);
+        server_out.flush();      
 
     }
     
@@ -224,7 +223,13 @@ public class ClientBoard extends JPanel implements ActionListener  {
     
     private void playGame(Graphics2D g2d) {
         byte message = 4;
+        if (inLevel){
         try {
+            server_out.writeInt(req_dx);
+            server_out.writeInt(req_dy);
+            server_out.flush();
+            bomberman_x = server_in.readInt();
+            bomberman_y = server_in.readInt();
             message = server_in.readByte();
         } catch (IOException ex) {
             Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
@@ -237,9 +242,10 @@ public class ClientBoard extends JPanel implements ActionListener  {
 
                 } else {
                     // Create new movement for bomberman
-                    BombermanMovement bombermanMovement = new BombermanMovement(req_dx, req_dy,
-                    BOMBERMAN_SPEED, bombie, mapCells, BLOCK_SIZE, N_BLOCKS, BOMBERMAN_SIZE);
-                    bombermanMovement.move();
+                    //BombermanMovement bombermanMovement = new BombermanMovement(req_dx, req_dy,
+                    //BOMBERMAN_SPEED, bombie, mapCells, BLOCK_SIZE, N_BLOCKS, BOMBERMAN_SIZE);
+                    //bombermanMovement.move();
+                    bombie.Move(bomberman_x, bomberman_y);
                     
                     for (CustomSprite s : sprites) {
                         s.Tick(g2d);
@@ -247,7 +253,12 @@ public class ClientBoard extends JPanel implements ActionListener  {
 
                 }
         }
-    }
+        }
+        else{
+         System.out.println("NOT IN");   
+        }
+        }
+    
     
     private void death() {
 
@@ -353,6 +364,7 @@ public class ClientBoard extends JPanel implements ActionListener  {
         view_dx = -1;
         view_dy = 0;
         dying = false;
+        inLevel = true;
     }
 
     private void loadImages() {

@@ -54,6 +54,15 @@ public class CustomSprite {
         this.image = image;
         this.board = board;
     }
+    
+    public CustomSprite(int position_x, int position_y, int height, int width,
+            Image image) {
+        this.height = height;
+        this.width = width;
+        this.position_x = position_x;
+        this.position_y = position_y;
+        this.image = image;
+    }
 
     public void ChangeImage(Image image) {
         this.image = image;
