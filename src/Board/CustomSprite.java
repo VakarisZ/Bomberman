@@ -5,7 +5,9 @@
  */
 package Board;
 
+import Client.ClientBoard;
 import com.sun.java.swing.plaf.windows.WindowsTableHeaderUI;
+import com.sun.security.ntlm.Client;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -41,16 +43,25 @@ public class CustomSprite {
     private int move_x;
     private int move_y;
     private Graphics2D g2d;
-    private Board board;
+    private ClientBoard board;
 
-    CustomSprite(int position_x, int position_y, int height, int width,
-            Image image, Board board) {
+    public CustomSprite(int position_x, int position_y, int height, int width,
+            Image image, ClientBoard board) {
         this.height = height;
         this.width = width;
         this.position_x = position_x;
         this.position_y = position_y;
         this.image = image;
         this.board = board;
+    }
+    
+    public CustomSprite(int position_x, int position_y, int height, int width,
+            Image image) {
+        this.height = height;
+        this.width = width;
+        this.position_x = position_x;
+        this.position_y = position_y;
+        this.image = image;
     }
 
     public void ChangeImage(Image image) {

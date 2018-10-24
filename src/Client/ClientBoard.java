@@ -3,12 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-/**
- *
- * @author Vakaris
- */
-package Board;
+package Client;
 
+import Board.Board;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -31,6 +28,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import Board.Cell;
+import Board.CustomSprite;
 import Board.Point;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -40,9 +38,15 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import Movement.BombermanMovement;
+import java.io.DataOutputStream;
+import java.util.Random;
 
-public class Board extends JPanel implements ActionListener {
-
+/**
+ *
+ * @author mati
+ */
+public class ClientBoard extends JPanel implements ActionListener  {
+    //Client side variables
     private Dimension d;
     private final Font smallFont = new Font("Helvetica", Font.BOLD, 14);
 
@@ -50,14 +54,37 @@ public class Board extends JPanel implements ActionListener {
     private final Color dotColor = new Color(192, 192, 0);
     private Color mazeColor;
 
-    private boolean inGame = false;
-    private boolean dying = false;
-
     private final int BLOCK_SIZE = 32;
     private final int N_BLOCKS = 15;
     private final int SCREEN_SIZE = N_BLOCKS * BLOCK_SIZE;
     private final int PAC_ANIM_DELAY = 2;
     private final int MAX_GHOSTS = 12;
+    
+    private Image ghost;
+    private Image bomber;
+    private Image bomberman1, bomberman2up, bomberman2left, bomberman2right, bomberman2down;
+    private Image bomberman3up, bomberman3down, bomberman3left, bomberman3right;
+    private Image bomberman4up, bomberman4down, bomberman4left, bomberman4right;
+
+    private int bomberman_x, bomberman_y;
+    private int bombermand_x = 32; // Dimensions of the bomberman
+    private int bombermand_y = 32;
+    private int req_dx, req_dy, view_dx, view_dy;
+    private CustomSprite bombie;
+    private Socket server_socket;
+    private DataInputStream server_in;
+    private DataOutputStream server_out;
+    private String client_id;
+    // Variables to be parsed from server
+    
+    
+    private int currentPlayerCount = 0;
+    
+    private boolean inGame = false;
+    private boolean inLevel = false;
+    private boolean dying = false;
+
+    
     private final int BOMBERMAN_SPEED = 3;
     // Determines the dimensions of bomberman collision detection 
     private final int BOMBERMAN_SIZE = 10;
@@ -68,62 +95,28 @@ public class Board extends JPanel implements ActionListener {
     private int[] ghost_x, ghost_y, ghost_dx, ghost_dy, ghostSpeed;
     private LinkedList<CustomSprite> sprites = new LinkedList<CustomSprite>();
 
-    private Image ghost;
-    private Image bomber;
-    private Image bomberman1, bomberman2up, bomberman2left, bomberman2right, bomberman2down;
-    private Image bomberman3up, bomberman3down, bomberman3left, bomberman3right;
-    private Image bomberman4up, bomberman4down, bomberman4left, bomberman4right;
-
-    public int bomberman_x, bomberman_y;
-    private int bombermand_x = 32; // Dimensions of the bomberman
-    private int bombermand_y = 32;
-    public int req_dx, req_dy, view_dx, view_dy;
-    private CustomSprite bombie;
-    private Socket server_socket;
-    private DataInputStream server_in;
+    
 
     private final Cell[][] mapCells = Cell.getMapCells(N_BLOCKS, N_BLOCKS, BLOCK_SIZE);
 
     private final int validSpeeds[] = {32};
     private final int maxSpeed = 32;
-    public int currentSpeed = 32;
+    private int currentSpeed = 32;
     private short[] screenData;
     private Timer timer;
-
-    public Board() {
-
+    
+    public ClientBoard() {
+        try {
+            initConnection();
+                    } catch (IOException ex) {
+            Logger.getLogger(ClientBoard.class.getName()).log(Level.SEVERE, null, ex);
+        }
         loadImages();
         initVariables();
         initBoard();
     }
-
-    private void initConnection() throws IOException {
-        server_socket = null;
-        try {
-            server_socket = new Socket("localhost", 4000);
-        } catch (IOException ex) {
-            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        server_in = new DataInputStream(server_socket.getInputStream());
-
-    }
-
-    private void initBoard() {
-
-        addKeyListener(new TAdapter());
-
-        setFocusable(true);
-
-        setBackground(Color.black);
-        setDoubleBuffered(true);
-//        try {
-//            initConnection();
-//        } catch (IOException ex) {
-//            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-    }
-
-    public void initVariables() {
+    
+    private void initVariables() {
 
         screenData = new short[N_BLOCKS * N_BLOCKS];
         mazeColor = new Color(5, 100, 5);
@@ -139,63 +132,89 @@ public class Board extends JPanel implements ActionListener {
         timer.start();
         bomberman_x = BLOCK_SIZE / 2;
         bomberman_y = BLOCK_SIZE / 2;
-        bombie = new CustomSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y, bomberman1);
+        bombie = new CustomSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y, bomberman1, this);
         sprites.add(bombie);
     }
+    
+    private void initBoard() {
 
+        addKeyListener(new TAdapter());
+
+        setFocusable(true);
+
+        setBackground(Color.black);
+        setDoubleBuffered(true);
+    }
+    
     @Override
-    public void addNotify() {
-        super.addNotify();
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
 
-        initGame();
+        doDrawing(g);
     }
-
-    private void doAnim() {
-
-//        pacAnimCount--;
-//
-//        if (pacAnimCount <= 0) {
-//            pacAnimCount = PAC_ANIM_DELAY;
-//            bombermanAnimPos = bombermanAnimPos + pacAnimDir;
-//
-//            if (bombermanAnimPos == (BOMBERMAN_ANIM_COUNT - 1) || bombermanAnimPos == 0) {
-//                pacAnimDir = -pacAnimDir;
-//            }
-//        }
+    
+    public String GenerateRandomString() {
+  
+    int leftLimit = 97; // letter 'a'
+    int rightLimit = 122; // letter 'z'
+    int targetStringLength = 10;
+    Random random = new Random();
+    StringBuilder buffer = new StringBuilder(targetStringLength);
+    for (int i = 0; i < targetStringLength; i++) {
+        int randomLimitedInt = leftLimit + (int) 
+          (random.nextFloat() * (rightLimit - leftLimit + 1));
+        buffer.append((char) randomLimitedInt);
     }
-
-    public void playGame(Graphics2D g2d) {
-//        byte message = 4;
+    String generatedString = buffer.toString();
+ 
+    System.out.println(generatedString);
+    return generatedString;
+    }
+    
+    private void initConnection() throws IOException {
+//        server_socket = null;
+        client_id = GenerateRandomString();
+        try {
+            server_socket = new Socket("localhost", 4000);
+        } catch (IOException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        server_in = new DataInputStream(server_socket.getInputStream());
+//        int newsocket = server_in.readInt();
 //        try {
-//            message = server_in.readByte();
+//            server_socket = new Socket("localhost", newsocket);
 //        } catch (IOException ex) {
 //            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
 //        }
-//        switch (message) {
-//            case 0:
-//                if (dying) {
-//
-//                    death();
-//
-//                } else {
-                    // Create new movement for bomberman
-                    bombie.Move(bomberman_x, bomberman_y);
-                    BombermanMovement bombermanMovement = new BombermanMovement(req_dx, req_dy,
-                    BOMBERMAN_SPEED, bombie, mapCells, BLOCK_SIZE, N_BLOCKS, BOMBERMAN_SIZE);
-                    bombermanMovement.move();
-                    bomberman_x = bombie.getX();
-                    bomberman_y = bombie.getY();
-                    
-                    
-                    for (CustomSprite s : sprites) {
-//                        s.Tick(g2d);
-                    }
-//                    checkMaze();
+//        server_in = new DataInputStream(server_socket.getInputStream());
+        server_out = new DataOutputStream(server_socket.getOutputStream());
+        server_out.writeUTF(client_id);
+        server_out.flush();      
 
-//                }
-//        }
     }
+    
+    
+    private void doDrawing(Graphics g) {
 
+        Graphics2D g2d = (Graphics2D) g;
+
+        g2d.setColor(Color.black);
+        g2d.fillRect(0, 0, d.width, d.height);
+
+        drawMaze(g2d);
+        drawScore(g2d);
+
+        if (inGame) {
+            playGame(g2d);
+        } else {
+            showIntroScreen(g2d);
+        }
+
+        g2d.drawImage(ii, 5, 5, this);
+        Toolkit.getDefaultToolkit().sync();
+        g2d.dispose();
+    }
+    
     private void showIntroScreen(Graphics2D g2d) {
 
         g2d.setColor(new Color(0, 32, 48));
@@ -211,7 +230,99 @@ public class Board extends JPanel implements ActionListener {
         g2d.setFont(small);
         g2d.drawString(s, (SCREEN_SIZE - metr.stringWidth(s)) / 2, SCREEN_SIZE / 2);
     }
+    private void getPlayersCoordinates(int playercount, LinkedList<CustomSprite> cs){
+        for (int i = 1; i < playercount + 1; i++){
+            try {
+                int pos_x = server_in.readInt();
+                int pos_y = server_in.readInt();
+                cs.get(i).Move(pos_x, pos_y);
+                
+            } catch (IOException ex) {
+                Logger.getLogger(ClientBoard.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    private void playGame(Graphics2D g2d) {
+        byte message = 4;
+        if (inLevel){
+        try {
+            server_out.writeInt(req_dx);
+            server_out.writeInt(req_dy);
+            server_out.flush();
+            bomberman_x = server_in.readInt();
+            bomberman_y = server_in.readInt();
+            message = server_in.readByte();
+        } catch (IOException ex) {
+            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        switch (message) {
+            case 0:
+                if (dying) {
 
+                    death();
+
+                } else {
+                    currentPlayerCount = message;
+                    // Create new movement for bomberman
+                    //BombermanMovement bombermanMovement = new BombermanMovement(req_dx, req_dy,
+                    //BOMBERMAN_SPEED, bombie, mapCells, BLOCK_SIZE, N_BLOCKS, BOMBERMAN_SIZE);
+                    //bombermanMovement.move();
+                    bombie.Move(bomberman_x, bomberman_y);
+                    
+                    for (CustomSprite s : sprites) {
+                        s.Tick(g2d);
+                    }
+
+                }
+            default:
+                if (dying) {
+
+                    death();
+
+                } else {
+                    if (currentPlayerCount < message)
+                    {
+                        for (int i = 0; i < message - currentPlayerCount; i++){
+                            sprites.add(new CustomSprite(0, 0, bombermand_x, bombermand_y, bomberman1, this));
+                        }
+                    }
+                        System.out.println("Sprites " + sprites.size());  
+                        System.out.println("Message " + message);  
+                        currentPlayerCount = message;
+                        getPlayersCoordinates(currentPlayerCount, sprites);
+                    
+                    
+                    // Create new movement for bomberman
+                    //BombermanMovement bombermanMovement = new BombermanMovement(req_dx, req_dy,
+                    //BOMBERMAN_SPEED, bombie, mapCells, BLOCK_SIZE, N_BLOCKS, BOMBERMAN_SIZE);
+                    //bombermanMovement.move();
+                    bombie.Move(bomberman_x, bomberman_y);
+                    
+                    for (CustomSprite s : sprites) {
+                        s.Tick(g2d);
+                    }
+
+                }
+                
+        }
+        }
+        else{
+         System.out.println("NOT IN");   
+        }
+        }
+    
+    
+    private void death() {
+
+        pacsLeft--;
+
+        if (pacsLeft == 0) {
+            inGame = false;
+        }
+
+        continueLevel();
+    }
+    
     private void drawScore(Graphics2D g) {
 
         int i;
@@ -226,115 +337,8 @@ public class Board extends JPanel implements ActionListener {
             g.drawImage(bomberman3left, i * 28 + 8, SCREEN_SIZE + 1, this);
         }
     }
-
-    private void checkMaze() {
-        //initlevel()
-    }
-
-    private void death() {
-
-        pacsLeft--;
-
-        if (pacsLeft == 0) {
-            inGame = false;
-        }
-
-        continueLevel();
-    }
-
-    private void moveGhosts(Graphics2D g2d) {
-
-        short i;
-        int pos;
-        int count;
-
-        for (i = 0; i < N_GHOSTS; i++) {
-            if (ghost_x[i] % BLOCK_SIZE == 0 && ghost_y[i] % BLOCK_SIZE == 0) {
-                pos = ghost_x[i] / BLOCK_SIZE + N_BLOCKS * (int) (ghost_y[i] / BLOCK_SIZE);
-
-                count = 0;
-
-                if ((screenData[pos] & 1) == 0 && ghost_dx[i] != 1) {
-                    dx[count] = -1;
-                    dy[count] = 0;
-                    count++;
-                }
-
-                if ((screenData[pos] & 2) == 0 && ghost_dy[i] != 1) {
-                    dx[count] = 0;
-                    dy[count] = -1;
-                    count++;
-                }
-
-                if ((screenData[pos] & 4) == 0 && ghost_dx[i] != -1) {
-                    dx[count] = 1;
-                    dy[count] = 0;
-                    count++;
-                }
-
-                if ((screenData[pos] & 8) == 0 && ghost_dy[i] != -1) {
-                    dx[count] = 0;
-                    dy[count] = 1;
-                    count++;
-                }
-
-                if (count == 0) {
-
-                    if ((screenData[pos] & 15) == 15) {
-                        ghost_dx[i] = 0;
-                        ghost_dy[i] = 0;
-                    } else {
-                        ghost_dx[i] = -ghost_dx[i];
-                        ghost_dy[i] = -ghost_dy[i];
-                    }
-
-                } else {
-
-                    count = (int) (Math.random() * count);
-
-                    if (count > 3) {
-                        count = 3;
-                    }
-
-                    ghost_dx[i] = dx[count];
-                    ghost_dy[i] = dy[count];
-                }
-
-            }
-
-            ghost_x[i] = ghost_x[i] + (ghost_dx[i] * ghostSpeed[i]);
-            ghost_y[i] = ghost_y[i] + (ghost_dy[i] * ghostSpeed[i]);
-            drawGhost(g2d, ghost_x[i] + 1, ghost_y[i] + 1);
-
-            if (bomberman_x > (ghost_x[i] - 12) && bomberman_x < (ghost_x[i] + 12)
-                    && bomberman_y > (ghost_y[i] - 12) && bomberman_y < (ghost_y[i] + 12)
-                    && inGame) {
-
-                dying = true;
-            }
-        }
-    }
-
-    private void drawGhost(Graphics2D g2d, int x, int y) {
-
-        g2d.drawImage(ghost, x, y, this);
-    }
-
-//    private void drawBomberman(Graphics2D g2d) {
-//            g2d.drawImage(bomberman1, bomberman_x - bombermand_x/2, 
-//               bomberman_y - bombermand_y/2, bombermand_x, bombermand_y, this );
-//        
-//    }
-//    private void drawMovingBomberman(Graphics2D g2d) {
-//        for (int i = 0; i < BOMBERMAN_MOVE_STEPS; i++){
-//            bomberman_x += (req_dx * bombermand_x / BOMBERMAN_MOVE_STEPS);
-//            bomberman_y += (req_dy * bombermand_y / BOMBERMAN_MOVE_STEPS);
-//            drawBomberman(g2d);
-//        }
-//        
-//    }
-
-    private void drawMaze(Graphics2D g2d) {
+    
+     private void drawMaze(Graphics2D g2d) {
 
         int x, y;
 
@@ -367,8 +371,8 @@ public class Board extends JPanel implements ActionListener {
             }
         }
     }
-
-    private void initGame() {
+     
+     private void initGame() {
 
         pacsLeft = 3;
         score = 0;
@@ -412,6 +416,7 @@ public class Board extends JPanel implements ActionListener {
         view_dx = -1;
         view_dy = 0;
         dying = false;
+        inLevel = true;
     }
 
     private void loadImages() {
@@ -420,36 +425,7 @@ public class Board extends JPanel implements ActionListener {
         bomberman1 = new ImageIcon("images/bomber_fixed.png").getImage();
 
     }
-
-    @Override
-    public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-
-        doDrawing(g);
-    }
-
-    private void doDrawing(Graphics g) {
-
-        Graphics2D g2d = (Graphics2D) g;
-
-        g2d.setColor(Color.black);
-        g2d.fillRect(0, 0, d.width, d.height);
-
-        drawMaze(g2d);
-        drawScore(g2d);
-        doAnim();
-
-        if (inGame) {
-            playGame(g2d);
-        } else {
-            showIntroScreen(g2d);
-        }
-
-        g2d.drawImage(ii, 5, 5, this);
-        Toolkit.getDefaultToolkit().sync();
-        g2d.dispose();
-    }
-
+    
     class TAdapter extends KeyAdapter {
 
         @Override
@@ -499,7 +475,6 @@ public class Board extends JPanel implements ActionListener {
             }
         }
     }
-
     @Override
     public void actionPerformed(ActionEvent e) {
 

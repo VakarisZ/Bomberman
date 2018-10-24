@@ -9,6 +9,7 @@ package Board;
  *
  * @author Vakaris
  */
+import Client.ClientBoard;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 
@@ -21,7 +22,7 @@ public class Bomberman extends JFrame {
     
     private void initUI() {
         
-        add(new Board());
+        add(new ClientBoard());
         
         setTitle("Bomberman");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
