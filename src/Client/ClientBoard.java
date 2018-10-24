@@ -78,6 +78,8 @@ public class ClientBoard extends JPanel implements ActionListener  {
     // Variables to be parsed from server
     
     
+    private int currentPlayerCount = 0;
+    
     private boolean inGame = false;
     private boolean inLevel = false;
     private boolean dying = false;
@@ -168,8 +170,9 @@ public class ClientBoard extends JPanel implements ActionListener  {
     System.out.println(generatedString);
     return generatedString;
     }
+    
     private void initConnection() throws IOException {
-        server_socket = null;
+//        server_socket = null;
         client_id = GenerateRandomString();
         try {
             server_socket = new Socket("localhost", 4000);
@@ -177,6 +180,13 @@ public class ClientBoard extends JPanel implements ActionListener  {
             Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
         }
         server_in = new DataInputStream(server_socket.getInputStream());
+//        int newsocket = server_in.readInt();
+//        try {
+//            server_socket = new Socket("localhost", newsocket);
+//        } catch (IOException ex) {
+//            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        server_in = new DataInputStream(server_socket.getInputStream());
         server_out = new DataOutputStream(server_socket.getOutputStream());
         server_out.writeUTF(client_id);
         server_out.flush();      
@@ -220,7 +230,18 @@ public class ClientBoard extends JPanel implements ActionListener  {
         g2d.setFont(small);
         g2d.drawString(s, (SCREEN_SIZE - metr.stringWidth(s)) / 2, SCREEN_SIZE / 2);
     }
-    
+    private void getPlayersCoordinates(int playercount, LinkedList<CustomSprite> cs){
+        for (int i = 1; i < playercount + 1; i++){
+            try {
+                int pos_x = server_in.readInt();
+                int pos_y = server_in.readInt();
+                cs.get(i).Move(pos_x, pos_y);
+                
+            } catch (IOException ex) {
+                Logger.getLogger(ClientBoard.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
     private void playGame(Graphics2D g2d) {
         byte message = 4;
         if (inLevel){
@@ -241,6 +262,7 @@ public class ClientBoard extends JPanel implements ActionListener  {
                     death();
 
                 } else {
+                    currentPlayerCount = message;
                     // Create new movement for bomberman
                     //BombermanMovement bombermanMovement = new BombermanMovement(req_dx, req_dy,
                     //BOMBERMAN_SPEED, bombie, mapCells, BLOCK_SIZE, N_BLOCKS, BOMBERMAN_SIZE);
@@ -252,6 +274,36 @@ public class ClientBoard extends JPanel implements ActionListener  {
                     }
 
                 }
+            default:
+                if (dying) {
+
+                    death();
+
+                } else {
+                    if (currentPlayerCount < message)
+                    {
+                        for (int i = 0; i < message - currentPlayerCount; i++){
+                            sprites.add(new CustomSprite(0, 0, bombermand_x, bombermand_y, bomberman1, this));
+                        }
+                    }
+                        System.out.println("Sprites " + sprites.size());  
+                        System.out.println("Message " + message);  
+                        currentPlayerCount = message;
+                        getPlayersCoordinates(currentPlayerCount, sprites);
+                    
+                    
+                    // Create new movement for bomberman
+                    //BombermanMovement bombermanMovement = new BombermanMovement(req_dx, req_dy,
+                    //BOMBERMAN_SPEED, bombie, mapCells, BLOCK_SIZE, N_BLOCKS, BOMBERMAN_SIZE);
+                    //bombermanMovement.move();
+                    bombie.Move(bomberman_x, bomberman_y);
+                    
+                    for (CustomSprite s : sprites) {
+                        s.Tick(g2d);
+                    }
+
+                }
+                
         }
         }
         else{
