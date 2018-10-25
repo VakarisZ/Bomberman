@@ -195,7 +195,7 @@ public class Connector {
         board = new Board();
         board.initVariables();
         try {
-            cc = new ClientConnector(3, clients);
+            cc = new ClientConnector(10, clients);
             cc.start();
         } catch (IOException ex) {
             Logger.getLogger(ClientConnector.class.getName()).log(Level.SEVERE, null, ex);
