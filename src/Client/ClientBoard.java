@@ -175,7 +175,7 @@ public class ClientBoard extends JPanel implements ActionListener  {
 //        server_socket = null;
         client_id = GenerateRandomString();
         try {
-            server_socket = new Socket("localhost", 4000);
+            server_socket = new Socket("192.168.43.85", 4000);
         } catch (IOException ex) {
             Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
         }
