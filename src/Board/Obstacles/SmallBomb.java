@@ -1,6 +1,4 @@
-/*
 
- */
 package Board.Obstacles;
 
 /**

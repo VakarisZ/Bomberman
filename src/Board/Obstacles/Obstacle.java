@@ -16,10 +16,9 @@ public abstract class Obstacle {
     //constructor
     public Obstacle(boolean destructable, boolean walkable) {
         this.destructable = destructable;
-        this.walkable = walkable;       
+        this.walkable = walkable;
     }
 
-    
     
     /**
      * getter
@@ -50,16 +49,12 @@ public abstract class Obstacle {
     }
     /**
      * setter
-     * Sets whether the obstacle is walkable or not 
+     * Sets whether the obstacle is walkable or not
      * (useful for movement and powerups?)
      * @param walkable 
      */
     public void setWalkable(boolean walkable) {
         this.walkable = walkable;
     }
-
-    
-    
-    
     
 }

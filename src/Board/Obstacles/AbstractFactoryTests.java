@@ -18,7 +18,7 @@ public class AbstractFactoryTests {
     public static void main(String[] args) {
 
         ObstacleFactory bombFactory = new BombFactory();
-        ObstacleFactory boxFactory = new BoxFactory();
+        //ObstacleFactory boxFactory = new BoxFactory();
 
         Scanner scanner = new Scanner(System.in);
         scanner.reset();
@@ -31,16 +31,17 @@ public class AbstractFactoryTests {
 
             if (userInput.toUpperCase().equals("G") || userInput.toUpperCase().equals("S")) {
                 Bomb bomb = null;
-                
+
                 //BombFactory bfact = new BombFactory();
-                
                 if (userInput.toUpperCase().equals("G")) {
                     bomb = (Bomb) bombFactory.createObstacle(ObstacleType.BigBomb);
                     //bomb = bfact.createObstacle("BigBomb");
                 } else if (userInput.toUpperCase().equals("S")) {
                     bomb = (Bomb) bombFactory.createObstacle(ObstacleType.SmallBomb);
                 }
-                
+
+                //BOMB DROP TEST
+                /*
                 if (bomb != null) {
                     try {
                         bomb.drop();
@@ -48,9 +49,21 @@ public class AbstractFactoryTests {
                         Logger.getLogger(AbstractFactoryTests.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
+                */
+                
+                /*
                 System.out.println(bomb instanceof SmallBomb);
                 System.out.println(bomb instanceof Bomb);
                 System.out.println(bomb instanceof Obstacle);
+                 */
+                
+                
+                //PROTOTYPE TEST
+                System.out.println(System.identityHashCode(bomb));
+                System.out.println(bomb.isPlanted());
+                bomb.setPlanted(true);
+                System.out.println(bomb.isPlanted());
+                
             }
 
             userInput = scanner.nextLine();

@@ -9,7 +9,7 @@ public abstract class ObstacleFactory {
     /**
      * met
      * @param type
-     * @return 
+     * @return
      */
-    public abstract Obstacle createObstacle(ObstacleType ot) ;
+    public abstract Obstacle createObstacle(ObstacleType obstacleType) ;
 }
