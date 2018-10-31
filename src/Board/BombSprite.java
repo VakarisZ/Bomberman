@@ -27,7 +27,7 @@ public class BombSprite {
         this.width = width;
         this.position_x = position_x;
         this.position_y = position_y;
-        this.image = new ImageIcon("images/bomber_fixed.png").getImage();
+        this.image = new ImageIcon("images/bomb1.png").getImage();
         this.board = board;
     }
     
