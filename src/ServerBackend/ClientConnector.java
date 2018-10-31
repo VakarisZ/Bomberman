@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Observable;
-import java.util.Observer;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
@@ -19,27 +18,22 @@ import java.util.logging.Logger;
  *
  * @author mati
  */
-public class ClientConnector extends Thread implements Observer{
+public class ClientConnector extends Thread{
 
-    private Queue<MultiClient> clients;// = new ConcurrentLinkedQueue<MultiClient>();
+    private Queue<MultiClient> clients = new ConcurrentLinkedQueue<MultiClient>();
     int maxClients;
     ServerSocket serverSocket;
-
+    IObserver obs;
+    
     ClientConnector() throws IOException {
 
     }
 
-    ClientConnector(int maxclients, Queue<MultiClient> cl) throws IOException {
-        // LinkedList<MultiClient> clients = new LinkedList<MultiClient>();
-//        serverSocket = new ServerSocket(4000);
+    ClientConnector(int maxclients, Queue<MultiClient> cl, IObserver o) throws IOException {
         clients = cl;
         maxClients = maxclients;
-//        Socket socket = serverSocket.accept();
-//        MultiClient t = new MultiClient(socket);
-//        t.start();
-//        clients.add(t);
-//        serverSocket.close();
-//        System.out.println("New client connected");
+        obs = o;
+
     }
 
     public void run() {
@@ -48,7 +42,7 @@ public class ClientConnector extends Thread implements Observer{
             while (clients.size() < maxClients) {
                 serverSocket = new ServerSocket(4000);
                 Socket socket = serverSocket.accept();
-                MultiClient t = new MultiClient(socket);
+                MultiClient t = new MultiClient(socket, obs);
                 t.start();
                 clients.add(t);
                 System.out.println("New client connected");
@@ -58,10 +52,5 @@ public class ClientConnector extends Thread implements Observer{
             Logger.getLogger(ClientConnector.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-    }
-
-    @Override
-    public void update(Observable o, Object o1) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

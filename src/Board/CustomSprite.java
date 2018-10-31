@@ -44,15 +44,17 @@ public class CustomSprite {
     private int move_y;
     private Graphics2D g2d;
     private ClientBoard board;
+    private String clientName;
 
     public CustomSprite(int position_x, int position_y, int height, int width,
-            Image image, ClientBoard board) {
+            Image image, ClientBoard board, String clientString) {
         this.height = height;
         this.width = width;
         this.position_x = position_x;
         this.position_y = position_y;
         this.image = image;
         this.board = board;
+        this.clientName = clientString;
     }
     
     public CustomSprite(int position_x, int position_y, int height, int width,
@@ -81,6 +83,18 @@ public class CustomSprite {
         this.position_y = y;
         this.moving = false;
     }
+    public boolean Move(String name, int x, int y){
+        if (this.clientName.equals(name)){
+            this.position_x = x;
+            this.position_y = y;
+            this.moving = false;
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    
 
     public void Tick(Graphics2D g2d) {
         this.g2d = g2d;
@@ -99,5 +113,15 @@ public class CustomSprite {
     
     public int getY(){
         return this.position_y;
+    }
+   
+    public boolean equals(CustomSprite otherEntry)
+    {
+        return clientName.equals(otherEntry.clientName);
+    }
+    
+    public boolean equals(String otherEntry)
+    {
+        return clientName.equals(otherEntry);
     }
 }

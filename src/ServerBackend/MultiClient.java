@@ -27,48 +27,34 @@ public class MultiClient extends Thread {
     public int bomberman_y = 16;
     public int req_dx, req_dy;
     public int currentSpeed = 32;
+    public ClientListener cl;
+    IObserver obs;
 
     MultiClient() throws IOException {
 
     }
-
-    MultiClient(Socket s) throws IOException {
+    
+    MultiClient(Socket s, IObserver o) throws IOException {
         this.s = s;
+        obs = o;
         infromClient = new DataInputStream(s.getInputStream());
         outtoClient = new DataOutputStream(s.getOutputStream());
-//        ServerSocket serverSocket = null;
-//        int newSocketPort = 4001;
-//        for (int i = 4001; i < 4200; i++){
-//            if (usedsockets.contains(i)){
-//                continue;
-//            }
-//            else
-//            {
-//                newSocketPort = i;
-//                usedsockets.add(i);
-//                outtoClient.writeInt(i);
-//                outtoClient.flush();
-//                serverSocket = new ServerSocket(newSocketPort);
-//                break;
-//            }
-//        }
-////        s.close();
-////        ServerSocket serverSocket = new ServerSocket(newSocketPort);
-//        Socket socket = serverSocket.accept();
-//        infromClient = new DataInputStream(socket.getInputStream());
-//        outtoClient = new DataOutputStream(socket.getOutputStream());
-        
-        
     }
 
     public void run() {
         try {
             clientName = infromClient.readUTF();
+            cl = new ClientListener(s, clientName, obs);
+            cl.start();
         } catch (IOException ex) {
             Logger.getLogger(MultiClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println("Client name: " + clientName);
 
+    }
+    
+    public boolean isClientName(String otherClientName){
+        return (clientName.equals(otherClientName));
     }
 
     public void disconnect() {
@@ -79,40 +65,54 @@ public class MultiClient extends Thread {
             Logger.getLogger(MultiClient.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-//    public void move(int x, int y){
+    public void moveSelf(int x, int y)
+    {
+        bomberman_x = x;
+        bomberman_y = y;
+        try {
+            outtoClient.writeInt(0);
+            outtoClient.writeInt(x);
+            outtoClient.writeInt(y);
+            outtoClient.flush();
+        } catch (IOException ex) {
+            Logger.getLogger(MultiClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
+//    public void move(int x, int y, Queue<MultiClient> clientsMoved) {
 //        try {
+//            int clientsCount = clientsMoved.size() - 1;
 //            outtoClient.writeInt(x);
 //            outtoClient.writeInt(y);
-//            outtoClient.writeByte(0);
-//            
+//            outtoClient.writeByte(clientsCount);
+//            for (MultiClient mc : clientsMoved) {
+//                if (mc.clientName != this.clientName) {
+//                    outtoClient.writeInt(mc.bomberman_x);
+//                    outtoClient.writeInt(mc.bomberman_y);
+//                }
+//            }
+//            outtoClient.flush();
+//
 //        } catch (IOException ex) {
 //            Logger.getLogger(MultiClient.class.getName()).log(Level.SEVERE, null, ex);
 //        }
 //        bomberman_x = x;
 //        bomberman_y = y;
-//        
+//
 //    }
-
-    public void move(int x, int y, Queue<MultiClient> clients) {
+    
+    public void MoveKnownClient(String clientString, int bx, int by)
+    {
         try {
-            int clientsCount = clients.size() - 1;
-            outtoClient.writeInt(x);
-            outtoClient.writeInt(y);
-            outtoClient.writeByte(clientsCount);
-            for (MultiClient mc : clients) {
-                if (mc.clientName != this.clientName) {
-                    outtoClient.writeInt(mc.bomberman_x);
-                    outtoClient.writeInt(mc.bomberman_y);
-                }
-            }
+            outtoClient.writeInt(1);
+            outtoClient.writeUTF(clientString);
+            outtoClient.writeInt(bx);
+            outtoClient.writeInt(by);
             outtoClient.flush();
-
         } catch (IOException ex) {
             Logger.getLogger(MultiClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-        bomberman_x = x;
-        bomberman_y = y;
-
     }
 
     public void getReq() {
@@ -121,6 +121,19 @@ public class MultiClient extends Thread {
             req_dy = infromClient.readInt();
         } catch (IOException ex) {
             Logger.getLogger(MultiClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
+    public void MoveUnknownClient(String clientString, int bx, int by)
+    {
+        if (isClientName(clientString))
+        {
+            moveSelf(bx, by);
+        }
+        else
+        {
+            MoveKnownClient(clientString, bx, by);
         }
     }
 }

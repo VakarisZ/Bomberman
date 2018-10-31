@@ -3,14 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ServerBackend;
-
-import java.util.Observable;
+package Client;
 
 /**
  *
  * @author mati
  */
-public class Clients extends Observable{
+public interface ListenerInterface {
+    public void moveOther(String clientName, int x, int y);
+    public void moveSelf(int x, int y);
+    public void addCustomSprite(String clientName, int x, int y);
     
 }
