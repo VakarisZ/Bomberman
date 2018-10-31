@@ -20,6 +20,8 @@ import java.util.Observer;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +34,7 @@ import java.util.logging.Logger;
 
 
 public class Connector implements IObserver {
+    Lock lock = new ReentrantLock();
 
     ClientConnector cc;// = new ClientConnector(2);
     Board board;
@@ -90,6 +93,7 @@ public class Connector implements IObserver {
 
     @Override
     public void Notify(String clientString, int req_dx, int req_dy) {
+        lock.lock();
         if (Move(clientString, req_dx, req_dy))
         {
             
@@ -105,6 +109,7 @@ public class Connector implements IObserver {
             
             
         }
+        lock.unlock();
     }
 
     @Override
