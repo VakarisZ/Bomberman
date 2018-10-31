@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Board;
+package Board.Sprites;
 
 import Client.ClientBoard;
 import java.awt.Graphics2D;

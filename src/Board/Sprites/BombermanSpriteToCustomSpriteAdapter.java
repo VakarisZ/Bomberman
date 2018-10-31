@@ -3,64 +3,69 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Board;
+package Board.Sprites;
 
 import Client.ClientBoard;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import javax.swing.ImageIcon;
+import Board.Sprites.BombermanSprite;
 
 /**
  *
  * @author mati
  */
-public class BombSpriteToCustomSpriteAdapter implements CustomSprite{
-    private BombSprite bombSprite;
-    
-    public BombSpriteToCustomSpriteAdapter (BombSprite bs){
-        bombSprite = bs;
+public class BombermanSpriteToCustomSpriteAdapter implements CustomSprite {
+
+    private BombermanSprite bombermanSprite;
+
+    public BombermanSpriteToCustomSpriteAdapter(BombermanSprite bs) {
+        bombermanSprite = bs;
     }
 
     @Override
     public void ChangeImage(Image image) {
-        bombSprite.ChangeImage(image);
+        bombermanSprite.ChangeImage(image);
     }
 
     @Override
     public void Move(int x, int y) {
-        bombSprite.Move(x, y);
+        bombermanSprite.Move(x, y);
     }
 
     @Override
     public boolean Move(String name, int x, int y) {
-        return bombSprite.Move(name, x, y);
+        return bombermanSprite.Move(name, x, y);
     }
 
     @Override
     public void Tick(Graphics2D g2d) {
-        bombSprite.DoTick(g2d);
+        bombermanSprite.Tick(g2d);
     }
 
     @Override
     public int getX() {
-        return bombSprite.getX();
+        return bombermanSprite.getX();
     }
 
     @Override
     public int getY() {
-        return bombSprite.getY();
+        return bombermanSprite.getY();
     }
 
     @Override
     public boolean equals(CustomSprite otherEntry) {
-        return false;
+        if (otherEntry.getClass().getSuperclass() == BombermanSprite.class) {
+            return bombermanSprite.equals(otherEntry);
+        } else {
+            return false;
+        }
     }
 
     @Override
     public boolean equals(String otherEntry) {
-        return false;
+        return bombermanSprite.equals(otherEntry);
 
     }
-    
+
 }
-    

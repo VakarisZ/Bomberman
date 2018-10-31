@@ -3,15 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Client;
+package Board.Sprites;
 
 /**
  *
  * @author mati
  */
-public interface ListenerInterface {
-    public void moveOther(String clientName, int x, int y);
-    public void moveSelf(int x, int y);
-    public void addEnemySprite(String clientName, int x, int y);
+public class BombermanDecorator extends BombermanSprite{
+    
+    public BombermanDecorator(BombermanSprite bs) {
+        super(bs);
+    }
     
 }

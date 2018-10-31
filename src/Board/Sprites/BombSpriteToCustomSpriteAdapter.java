@@ -3,69 +3,64 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Board;
+package Board.Sprites;
 
 import Client.ClientBoard;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import javax.swing.ImageIcon;
-import Board.BombermanSprite;
 
 /**
  *
  * @author mati
  */
-public class BombermanSpriteToCustomSpriteAdapter implements CustomSprite {
-
-    private BombermanSprite bombermanSprite;
-
-    public BombermanSpriteToCustomSpriteAdapter(BombermanSprite bs) {
-        bombermanSprite = bs;
+public class BombSpriteToCustomSpriteAdapter implements CustomSprite{
+    private BombSprite bombSprite;
+    
+    public BombSpriteToCustomSpriteAdapter (BombSprite bs){
+        bombSprite = bs;
     }
 
     @Override
     public void ChangeImage(Image image) {
-        bombermanSprite.ChangeImage(image);
+        bombSprite.ChangeImage(image);
     }
 
     @Override
     public void Move(int x, int y) {
-        bombermanSprite.Move(x, y);
+        bombSprite.Move(x, y);
     }
 
     @Override
     public boolean Move(String name, int x, int y) {
-        return bombermanSprite.Move(name, x, y);
+        return bombSprite.Move(name, x, y);
     }
 
     @Override
     public void Tick(Graphics2D g2d) {
-        bombermanSprite.Tick(g2d);
+        bombSprite.DoTick(g2d);
     }
 
     @Override
     public int getX() {
-        return bombermanSprite.getX();
+        return bombSprite.getX();
     }
 
     @Override
     public int getY() {
-        return bombermanSprite.getY();
+        return bombSprite.getY();
     }
 
     @Override
     public boolean equals(CustomSprite otherEntry) {
-        if (otherEntry.getClass().getSuperclass() == BombermanSprite.class) {
-            return bombermanSprite.equals(otherEntry);
-        } else {
-            return false;
-        }
+        return false;
     }
 
     @Override
     public boolean equals(String otherEntry) {
-        return bombermanSprite.equals(otherEntry);
+        return false;
 
     }
-
+    
 }
+    

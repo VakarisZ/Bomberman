@@ -6,8 +6,8 @@
 package Client;
 
 import Board.Board;
-import Board.BombermanSprite;
-import Board.BombermanSpriteToCustomSpriteAdapter;
+import Board.Sprites.BombermanSprite;
+import Board.Sprites.BombermanSpriteToCustomSpriteAdapter;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -30,8 +30,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import Board.Cell;
-import Board.CustomSprite;
+import Board.Sprites.CustomSprite;
 import Board.Point;
+import Board.Sprites.EnemyBombermanSprite;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -191,7 +192,7 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
         server_out = new DataOutputStream(server_socket.getOutputStream());
         server_out.writeUTF(client_id);
         server_out.flush();
-        BombermanSprite temp_b = new BombermanSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y, bomberman1, this, client_id);
+        BombermanSprite temp_b = new BombermanSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y, this, client_id);
         bombie = new BombermanSpriteToCustomSpriteAdapter(temp_b);
         sprites.add(bombie);
         sl = new ServerListener(server_in, this);
@@ -205,22 +206,23 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
     }
 
     @Override
-    public void moveOther(String clienString, int x, int y) {
+    public void moveOther(String clientString, int x, int y) {
         boolean contains = false;
         for (int i = 0; i < sprites.size() && !contains; i++) {
-            if (sprites.get(i).equals(clienString)) {
+            if (sprites.get(i).equals(clientString)) {
                 contains = true;
             }
         }
         if (!contains) {
-            BombermanSprite temp_b = new BombermanSprite(x, y, bombermand_x, bombermand_y, bomberman1, this, clienString);
-            CustomSprite s = new BombermanSpriteToCustomSpriteAdapter(temp_b);
-            sprites.add(s);
+//            BombermanSprite temp_b = new BombermanSprite(x, y, bombermand_x, bombermand_y, this, clienString);
+//            CustomSprite s = new BombermanSpriteToCustomSpriteAdapter(temp_b);
+//            sprites.add(s);
+            addEnemySprite(clientString, x, y);
 
         }
 
         for (CustomSprite c : sprites) {
-            if (c.Move(clienString, x, y)) {
+            if (c.Move(clientString, x, y)) {
                 return;
             }
         }
@@ -228,9 +230,10 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
     }
 
     @Override
-    public void addCustomSprite(String name, int x, int y) {
-        BombermanSprite temp_b = new BombermanSprite(x, y, bombermand_x, bombermand_y, bomberman1, this, name);
-        CustomSprite s = new BombermanSpriteToCustomSpriteAdapter(temp_b);
+    public void addEnemySprite(String name, int x, int y) {
+        BombermanSprite temp_b = new BombermanSprite(x, y, bombermand_x, bombermand_y, this, name);
+        EnemyBombermanSprite ebs = new EnemyBombermanSprite(temp_b);
+        CustomSprite s = new BombermanSpriteToCustomSpriteAdapter(ebs);
         sprites.add(s);
     }
 
