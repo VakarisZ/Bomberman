@@ -139,7 +139,8 @@ public class Board extends JPanel implements ActionListener {
         timer.start();
         bomberman_x = BLOCK_SIZE / 2;
         bomberman_y = BLOCK_SIZE / 2;
-        bombie = new CustomSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y, bomberman1);
+        BombermanSprite bombieTemp =  new BombermanSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y, bomberman1);
+        bombie = new BombermanSpriteToCustomSpriteAdapter(bombieTemp);
         sprites.add(bombie);
     }
 
