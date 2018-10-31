@@ -37,7 +37,6 @@ public class ClientConnector extends Thread{
     }
 
     public void run() {
-
         try {
             while (clients.size() < maxClients) {
                 serverSocket = new ServerSocket(4000);
