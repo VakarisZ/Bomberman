@@ -62,7 +62,7 @@ public class AbstractFactoryTests {
                 } else if (userInput.toUpperCase().equals("S")) {
                     bomb2 = (Bomb) bombFactory.createObstacle(ObstacleType.SmallBomb);
                 }
-                Bomb bomb3 = bomb.deepCopy();
+                Bomb bomb3 = bomb.shallowCopy();
                 System.out.println(System.identityHashCode(bomb.getExplosionTimer()));
                 System.out.println(System.identityHashCode(bomb2.getExplosionTimer()));
                 System.out.println(System.identityHashCode(bomb3.getExplosionTimer()));
