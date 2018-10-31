@@ -9,6 +9,9 @@
  */
 package Board;
 
+import Board.Sprites.BombermanSprite;
+import Board.Sprites.CustomSprite;
+import Board.Sprites.BombermanSpriteToCustomSpriteAdapter;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -139,7 +142,7 @@ public class Board extends JPanel implements ActionListener {
         timer.start();
         bomberman_x = BLOCK_SIZE / 2;
         bomberman_y = BLOCK_SIZE / 2;
-        BombermanSprite bombieTemp =  new BombermanSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y, bomberman1);
+        BombermanSprite bombieTemp =  new BombermanSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y);
         bombie = new BombermanSpriteToCustomSpriteAdapter(bombieTemp);
         sprites.add(bombie);
     }
