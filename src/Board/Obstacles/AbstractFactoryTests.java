@@ -49,21 +49,28 @@ public class AbstractFactoryTests {
                         Logger.getLogger(AbstractFactoryTests.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                */
-                
-                /*
+                 */
+ /*
                 System.out.println(bomb instanceof SmallBomb);
                 System.out.println(bomb instanceof Bomb);
                 System.out.println(bomb instanceof Obstacle);
                  */
-                
-                
                 //PROTOTYPE TEST
-                System.out.println(System.identityHashCode(bomb));
-                System.out.println(bomb.isPlanted());
+                Bomb bomb2 = null;
+                if (userInput.toUpperCase().equals("G")) {
+                    bomb2 = (Bomb) bombFactory.createObstacle(ObstacleType.BigBomb);
+                } else if (userInput.toUpperCase().equals("S")) {
+                    bomb2 = (Bomb) bombFactory.createObstacle(ObstacleType.SmallBomb);
+                }
+                Bomb bomb3 = bomb.deepCopy();
+                System.out.println(System.identityHashCode(bomb.getExplosionTimer()));
+                System.out.println(System.identityHashCode(bomb2.getExplosionTimer()));
+                System.out.println(System.identityHashCode(bomb3.getExplosionTimer()));
+                /*System.out.println(bomb.isPlanted());
                 bomb.setPlanted(true);
                 System.out.println(bomb.isPlanted());
-                
+                 */
+
             }
 
             userInput = scanner.nextLine();
