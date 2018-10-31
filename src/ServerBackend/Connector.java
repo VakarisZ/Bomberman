@@ -6,6 +6,7 @@
 package ServerBackend;
 
 import Board.Board;
+import com.sun.media.sound.WaveFloatFileReader;
 import java.awt.Graphics2D;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -14,6 +15,7 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
+import java.util.Observable;
 import java.util.Observer;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -29,13 +31,13 @@ import java.util.logging.Logger;
 
 
 
-public class Connector {
+public class Connector implements IObserver {
 
     ClientConnector cc;// = new ClientConnector(2);
     Board board;
     public Graphics2D g2d_placeholder;
-    Queue<MultiClient> clients;// = new ConcurrentLinkedQueue<MultiClient>();
-
+//    Queue<MultiClient> clients;// = new ConcurrentLinkedQueue<MultiClient>();
+    Queue<MultiClient> clients = new ConcurrentLinkedQueue<MultiClient>();
     public Connector() {
     }
 
@@ -46,36 +48,74 @@ public class Connector {
     }
 
     public void StartGame() {
-        clients = new ConcurrentLinkedQueue<MultiClient>();
         board = new Board();
         board.initVariables();
         try {
-            cc = new ClientConnector(5, clients);
+            cc = new ClientConnector(5, clients, this);
             cc.start();
         } catch (IOException ex) {
             Logger.getLogger(ClientConnector.class.getName()).log(Level.SEVERE, null, ex);
         }
-        PlayGame();
+    }
+    
+    public boolean Move(String clientString, int req_dx, int req_dy)
+    {
+        for (MultiClient c : clients){
+            if (c.isClientName(clientString))
+            {
+                board.req_dx = req_dx;
+                board.req_dy = req_dy;
+                board.bomberman_x = c.bomberman_x;
+                board.bomberman_y = c.bomberman_y;
+                board.playGame(g2d_placeholder);
+                if (board.bomberman_x != c.bomberman_x || 
+                        board.bomberman_y != c.bomberman_y)
+                {
+                    c.bomberman_x = board.bomberman_x;
+                    c.bomberman_y = board.bomberman_y;                    
+                    return true;
+                }
+                else{
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
-    public void PlayGame() {
-        while (true) {
-            doPlayers();
+    @Override
+    public void Update(IObservable o) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void Notify(String clientString, int req_dx, int req_dy) {
+        if (Move(clientString, req_dx, req_dy))
+        {
+            
+            for (MultiClient c : clients)
+            {
+                if (c.isClientName(clientString))
+                {
+                    c.moveSelf(board.bomberman_x, board.bomberman_y);
+                    break;
+                }
+            }
+            NotifyAll(clientString);
+            
+            
         }
     }
 
-    public void doPlayers() {
-        for (MultiClient c : clients) {
-            System.out.println("REQUESTING DIR");
-            c.getReq();
-            System.out.println("GOT DIR");
-            board.req_dx = c.req_dx;
-            board.req_dy = c.req_dy;
-            board.bomberman_x = c.bomberman_x;
-            board.bomberman_y = c.bomberman_y;
-            board.playGame(g2d_placeholder);
-            c.move(board.bomberman_x, board.bomberman_y, clients);
-            System.out.println("STUFF");
-        }
+    @Override
+    public void NotifyAll(String clientString) {
+        for (MultiClient c : clients)
+            {
+                if (!c.isClientName(clientString))
+                {
+                    c.MoveKnownClient(clientString, board.bomberman_x, board.bomberman_y);
+                }
+            }
+
     }
 }
