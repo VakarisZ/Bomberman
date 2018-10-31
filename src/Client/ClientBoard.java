@@ -39,13 +39,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import Movement.BombermanMovement;
 import java.io.DataOutputStream;
+import java.util.Queue;
 import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  *
  * @author mati
  */
-public class ClientBoard extends JPanel implements ActionListener  {
+public class ClientBoard extends JPanel implements ActionListener, ListenerInterface {
+
     //Client side variables
     private Dimension d;
     private final Font smallFont = new Font("Helvetica", Font.BOLD, 14);
@@ -59,7 +62,7 @@ public class ClientBoard extends JPanel implements ActionListener  {
     private final int SCREEN_SIZE = N_BLOCKS * BLOCK_SIZE;
     private final int PAC_ANIM_DELAY = 2;
     private final int MAX_GHOSTS = 12;
-    
+
     private Image ghost;
     private Image bomber;
     private Image bomberman1, bomberman2up, bomberman2left, bomberman2right, bomberman2down;
@@ -76,15 +79,14 @@ public class ClientBoard extends JPanel implements ActionListener  {
     private DataOutputStream server_out;
     private String client_id;
     // Variables to be parsed from server
-    
-    
+
     private int currentPlayerCount = 0;
-    
+    private ServerListener sl;
+
     private boolean inGame = false;
     private boolean inLevel = false;
     private boolean dying = false;
 
-    
     private final int BOMBERMAN_SPEED = 3;
     // Determines the dimensions of bomberman collision detection 
     private final int BOMBERMAN_SIZE = 10;
@@ -93,9 +95,7 @@ public class ClientBoard extends JPanel implements ActionListener  {
     private int pacsLeft, score;
     private int[] dx, dy;
     private int[] ghost_x, ghost_y, ghost_dx, ghost_dy, ghostSpeed;
-    private LinkedList<CustomSprite> sprites = new LinkedList<CustomSprite>();
-
-    
+    private LinkedList<CustomSprite> sprites; // = new LinkedList<CustomSprite>();
 
     private final Cell[][] mapCells = Cell.getMapCells(N_BLOCKS, N_BLOCKS, BLOCK_SIZE);
 
@@ -104,18 +104,20 @@ public class ClientBoard extends JPanel implements ActionListener  {
     private int currentSpeed = 32;
     private short[] screenData;
     private Timer timer;
-    
+
     public ClientBoard() {
+        sprites = new LinkedList<CustomSprite>();
+        loadImages();
         try {
             initConnection();
-                    } catch (IOException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(ClientBoard.class.getName()).log(Level.SEVERE, null, ex);
         }
-        loadImages();
+
         initVariables();
         initBoard();
     }
-    
+
     private void initVariables() {
 
         screenData = new short[N_BLOCKS * N_BLOCKS];
@@ -132,10 +134,9 @@ public class ClientBoard extends JPanel implements ActionListener  {
         timer.start();
         bomberman_x = BLOCK_SIZE / 2;
         bomberman_y = BLOCK_SIZE / 2;
-        bombie = new CustomSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y, bomberman1, this);
-        sprites.add(bombie);
+
     }
-    
+
     private void initBoard() {
 
         addKeyListener(new TAdapter());
@@ -145,32 +146,30 @@ public class ClientBoard extends JPanel implements ActionListener  {
         setBackground(Color.black);
         setDoubleBuffered(true);
     }
-    
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         doDrawing(g);
     }
-    
+
     public String GenerateRandomString() {
-  
-    int leftLimit = 97; // letter 'a'
-    int rightLimit = 122; // letter 'z'
-    int targetStringLength = 10;
-    Random random = new Random();
-    StringBuilder buffer = new StringBuilder(targetStringLength);
-    for (int i = 0; i < targetStringLength; i++) {
-        int randomLimitedInt = leftLimit + (int) 
-          (random.nextFloat() * (rightLimit - leftLimit + 1));
-        buffer.append((char) randomLimitedInt);
+
+        int leftLimit = 97; // letter 'a'
+        int rightLimit = 122; // letter 'z'
+        int targetStringLength = 10;
+        Random random = new Random();
+        StringBuilder buffer = new StringBuilder(targetStringLength);
+        for (int i = 0; i < targetStringLength; i++) {
+            int randomLimitedInt = leftLimit + (int) (random.nextFloat() * (rightLimit - leftLimit + 1));
+            buffer.append((char) randomLimitedInt);
+        }
+        String generatedString = buffer.toString();
+
+        System.out.println(generatedString);
+        return generatedString;
     }
-    String generatedString = buffer.toString();
- 
-    System.out.println(generatedString);
-    return generatedString;
-    }
-    
+
     private void initConnection() throws IOException {
 //        server_socket = null;
         client_id = GenerateRandomString();
@@ -189,11 +188,47 @@ public class ClientBoard extends JPanel implements ActionListener  {
 //        server_in = new DataInputStream(server_socket.getInputStream());
         server_out = new DataOutputStream(server_socket.getOutputStream());
         server_out.writeUTF(client_id);
-        server_out.flush();      
+        server_out.flush();
+        bombie = new CustomSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y, bomberman1, this, client_id);
+        sprites.add(bombie);
+        sl = new ServerListener(server_in, this);
+        sl.start();
 
     }
-    
-    
+
+    @Override
+    public void moveSelf(int x, int y) {
+        bombie.Move(x, y);
+    }
+
+    @Override
+    public void moveOther(String clienString, int x, int y) {
+        boolean contains = false;
+        for (int i = 0; i < sprites.size() && !contains; i++) {
+            if (sprites.get(i).equals(clienString)) {
+                contains = true;
+            }
+        }
+        if (!contains) {
+            CustomSprite s = new CustomSprite(x, y, bombermand_x, bombermand_y, bomberman1, this, clienString);
+            sprites.add(s);
+
+        }
+
+        for (CustomSprite c : sprites) {
+            if (c.Move(clienString, x, y)) {
+                return;
+            }
+        }
+
+    }
+
+    @Override
+    public void addCustomSprite(String name, int x, int y) {
+        CustomSprite s = new CustomSprite(x, y, bombermand_x, bombermand_y, bomberman1, this, name);
+        sprites.add(s);
+    }
+
     private void doDrawing(Graphics g) {
 
         Graphics2D g2d = (Graphics2D) g;
@@ -214,7 +249,7 @@ public class ClientBoard extends JPanel implements ActionListener  {
         Toolkit.getDefaultToolkit().sync();
         g2d.dispose();
     }
-    
+
     private void showIntroScreen(Graphics2D g2d) {
 
         g2d.setColor(new Color(0, 32, 48));
@@ -230,88 +265,100 @@ public class ClientBoard extends JPanel implements ActionListener  {
         g2d.setFont(small);
         g2d.drawString(s, (SCREEN_SIZE - metr.stringWidth(s)) / 2, SCREEN_SIZE / 2);
     }
-    private void getPlayersCoordinates(int playercount, LinkedList<CustomSprite> cs){
-        for (int i = 1; i < playercount + 1; i++){
+
+    private void getPlayersCoordinates(int playercount, LinkedList<CustomSprite> cs) {
+        for (int i = 1; i < playercount + 1; i++) {
             try {
                 int pos_x = server_in.readInt();
                 int pos_y = server_in.readInt();
                 cs.get(i).Move(pos_x, pos_y);
-                
+
             } catch (IOException ex) {
                 Logger.getLogger(ClientBoard.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
+
     private void playGame(Graphics2D g2d) {
-        byte message = 4;
-        if (inLevel){
         try {
             server_out.writeInt(req_dx);
             server_out.writeInt(req_dy);
             server_out.flush();
-            bomberman_x = server_in.readInt();
-            bomberman_y = server_in.readInt();
-            message = server_in.readByte();
+            for (CustomSprite s : sprites) {
+                s.Tick(g2d);
+            }
+
+//        int message = 4;
+//        if (inLevel){
+//        try {
+//            server_out.writeInt(req_dx);
+//            server_out.writeInt(req_dy);
+//            server_out.flush();
+//            bomberman_x = server_in.readInt();
+//            bomberman_y = server_in.readInt();
+//            message = server_in.readByte();
+//        } catch (IOException ex) {
+//            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        switch (message) {
+//            case 0:
+//                if (dying) {
+//
+//                    death();
+//
+//                } else {
+//                    currentPlayerCount = message;
+//                    // Create new movement for bomberman
+//                    //BombermanMovement bombermanMovement = new BombermanMovement(req_dx, req_dy,
+//                    //BOMBERMAN_SPEED, bombie, mapCells, BLOCK_SIZE, N_BLOCKS, BOMBERMAN_SIZE);
+//                    //bombermanMovement.move();
+//                    bombie.Move(bomberman_x, bomberman_y);
+//                    
+//                    for (CustomSprite s : sprites) {
+//                        s.Tick(g2d);
+//                    }
+//
+//                }
+//            default:
+//                if (dying) {
+//
+//                    death();
+//
+//                } else {
+//                    if (currentPlayerCount < message)
+//                    {
+//                        for (int i = 0; i < message - currentPlayerCount; i++){
+//                            sprites.add(new CustomSprite(0, 0, bombermand_x, bombermand_y, bomberman1, this));
+//                        }
+//                    }
+//                        System.out.println("Sprites " + sprites.size());
+//                        System.out.println("Message " + message);  
+//                        currentPlayerCount = message;
+//                        getPlayersCoordinates(currentPlayerCount, sprites);
+//
+//                    
+//                    // Create new movement for bomberman
+//                    //BombermanMovement bombermanMovement = new BombermanMovement(req_dx, req_dy,
+//                    //BOMBERMAN_SPEED, bombie, mapCells, BLOCK_SIZE, N_BLOCKS, BOMBERMAN_SIZE);
+//                    //bombermanMovement.move();
+//                    bombie.Move(bomberman_x, bomberman_y);
+//                    
+//                    for (CustomSprite s : sprites) {
+//                        s.Tick(g2d);
+//                    }
+//
+//                }
+//                
+//        }
+//        }
+//        else{
+//         System.out.println("NOT IN");   
+//        }
         } catch (IOException ex) {
-            Logger.getLogger(Board.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ClientBoard.class.getName()).log(Level.SEVERE, null, ex);
         }
-        switch (message) {
-            case 0:
-                if (dying) {
+    }
 
-                    death();
-
-                } else {
-                    currentPlayerCount = message;
-                    // Create new movement for bomberman
-                    //BombermanMovement bombermanMovement = new BombermanMovement(req_dx, req_dy,
-                    //BOMBERMAN_SPEED, bombie, mapCells, BLOCK_SIZE, N_BLOCKS, BOMBERMAN_SIZE);
-                    //bombermanMovement.move();
-                    bombie.Move(bomberman_x, bomberman_y);
-                    
-                    for (CustomSprite s : sprites) {
-                        s.Tick(g2d);
-                    }
-
-                }
-            default:
-                if (dying) {
-
-                    death();
-
-                } else {
-                    if (currentPlayerCount < message)
-                    {
-                        for (int i = 0; i < message - currentPlayerCount; i++){
-                            sprites.add(new CustomSprite(0, 0, bombermand_x, bombermand_y, bomberman1, this));
-                        }
-                    }
-                        System.out.println("Sprites " + sprites.size());  
-                        System.out.println("Message " + message);  
-                        currentPlayerCount = message;
-                        getPlayersCoordinates(currentPlayerCount, sprites);
-                    
-                    
-                    // Create new movement for bomberman
-                    //BombermanMovement bombermanMovement = new BombermanMovement(req_dx, req_dy,
-                    //BOMBERMAN_SPEED, bombie, mapCells, BLOCK_SIZE, N_BLOCKS, BOMBERMAN_SIZE);
-                    //bombermanMovement.move();
-                    bombie.Move(bomberman_x, bomberman_y);
-                    
-                    for (CustomSprite s : sprites) {
-                        s.Tick(g2d);
-                    }
-
-                }
-                
-        }
-        }
-        else{
-         System.out.println("NOT IN");   
-        }
-        }
-    
-    
     private void death() {
 
         pacsLeft--;
@@ -322,7 +369,7 @@ public class ClientBoard extends JPanel implements ActionListener  {
 
         continueLevel();
     }
-    
+
     private void drawScore(Graphics2D g) {
 
         int i;
@@ -337,8 +384,8 @@ public class ClientBoard extends JPanel implements ActionListener  {
             g.drawImage(bomberman3left, i * 28 + 8, SCREEN_SIZE + 1, this);
         }
     }
-    
-     private void drawMaze(Graphics2D g2d) {
+
+    private void drawMaze(Graphics2D g2d) {
 
         int x, y;
 
@@ -371,8 +418,8 @@ public class ClientBoard extends JPanel implements ActionListener  {
             }
         }
     }
-     
-     private void initGame() {
+
+    private void initGame() {
 
         pacsLeft = 3;
         score = 0;
@@ -425,7 +472,7 @@ public class ClientBoard extends JPanel implements ActionListener  {
         bomberman1 = new ImageIcon("images/bomber_fixed.png").getImage();
 
     }
-    
+
     class TAdapter extends KeyAdapter {
 
         @Override
@@ -475,6 +522,7 @@ public class ClientBoard extends JPanel implements ActionListener  {
             }
         }
     }
+
     @Override
     public void actionPerformed(ActionEvent e) {
 
