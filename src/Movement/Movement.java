@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 package Movement;
-import Board.CustomSprite;
+import Board.Sprites.CustomSprite;
 import Board.Cell;
 
 /**

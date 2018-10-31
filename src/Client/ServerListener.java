@@ -48,7 +48,7 @@ public class ServerListener extends Thread{
                         clientName = infromServer.readUTF();
                         x = infromServer.readInt();
                         y = infromServer.readInt();
-                        listener.addCustomSprite(clientName, x, y);
+                        listener.addEnemySprite(clientName, x, y);
                         listener.moveOther(clientName, x, y);
                         
                         

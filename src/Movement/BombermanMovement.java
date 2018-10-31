@@ -6,7 +6,7 @@
 package Movement;
 
 import Board.Cell;
-import Board.CustomSprite;
+import Board.Sprites.CustomSprite;
 import Board.Point;
 import java.util.Map;
 
