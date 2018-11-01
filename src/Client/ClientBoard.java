@@ -33,6 +33,7 @@ import javax.swing.Timer;
 import Board.Cell;
 import Board.Sprites.CustomSprite;
 import Board.Point;
+import Board.Sprites.BombermanEnemySpriteToCustomSpriteAdapter;
 import Board.Sprites.EnemyBombermanSprite;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -193,6 +194,7 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
         server_out.writeUTF(client_id);
         server_out.flush();
         BombermanSprite temp_b = new BombermanSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y, this, client_id);
+        temp_b.Assemble();
         bombie = new BombermanSpriteToCustomSpriteAdapter(temp_b);
         sprites.add(bombie);
         sl = new ServerListener(server_in, this);
@@ -233,7 +235,8 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
     public void addEnemySprite(String name, int x, int y) {
         BombermanSprite temp_b = new BombermanSprite(x, y, bombermand_x, bombermand_y, this, name);
         EnemyBombermanSprite ebs = new EnemyBombermanSprite(temp_b);
-        CustomSprite s = new BombermanSpriteToCustomSpriteAdapter(ebs);
+        ebs.Assemble();
+        CustomSprite s = new BombermanEnemySpriteToCustomSpriteAdapter(ebs);
         sprites.add(s);
     }
 

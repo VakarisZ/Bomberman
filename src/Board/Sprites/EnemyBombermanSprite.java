@@ -16,8 +16,12 @@ public class EnemyBombermanSprite extends BombermanDecorator{
     
     public EnemyBombermanSprite(BombermanSprite bs) {
         super(bs);
-        Image enemyImage = new ImageIcon("images/bomber_enemy.png").getImage(); 
-        ChangeImage(enemyImage);
+    }
+    @Override 
+    public void Assemble(){
+        
+        Image image = new ImageIcon("images/bomber_enemy.png").getImage();
+        super.bps.ChangeImage(image);
     }
     
 }

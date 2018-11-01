@@ -18,7 +18,7 @@ import javax.swing.ImageIcon;
  *
  * @author mati
  */
-public class BombermanSprite {
+public class BombermanSprite implements BombermanSpriteInterface {
 
     private int height, width, position_x, position_y;
     private Image image;
@@ -47,7 +47,6 @@ public class BombermanSprite {
         this.width = width;
         this.position_x = position_x;
         this.position_y = position_y;
-        this.image = new ImageIcon("images/bomber_fixed.png").getImage();
         this.board = board;
         this.clientName = clientString;
     }
@@ -56,15 +55,18 @@ public class BombermanSprite {
         this.width = width;
         this.position_x = position_x;
         this.position_y = position_y;
-        this.image = new ImageIcon("images/bomber_fixed.png").getImage();
         this.board = board;
     }
     
-
+    @Override
+    public void Assemble(){
+        this.image = new ImageIcon("images/bomber_fixed.png").getImage();
+    }
+    @Override
     public void ChangeImage(Image image) {
         this.image = image;
     }
-
+    @Override
     public void Move(int dx, int dy, int movement_speed) {
         this.move_x = dx;
         this.move_y = dy;
@@ -72,12 +74,13 @@ public class BombermanSprite {
         this.movement_speed = movement_speed;
         
     }
-    
+    @Override
     public void Move(int x, int y){
         this.position_x = x;
         this.position_y = y;
         this.moving = false;
     }
+    @Override
     public boolean Move(String name, int x, int y){
         if (this.clientName.equals(name)){
             this.position_x = x;
@@ -89,18 +92,18 @@ public class BombermanSprite {
             return false;
         }
     }
-    
+    @Override
     public void moveAs(){
         for(Movement a : moveList) {
             a.move();
         }
         moveList =  new ArrayList<Movement>();
     }
-
+    @Override
     public void addMove(Movement movement){
         this.moveList.add(movement);
     }
-    
+    @Override
     public void Tick(Graphics2D g2d) {
         this.g2d = g2d;
         if (this.moving) {
@@ -111,22 +114,28 @@ public class BombermanSprite {
         g2d.drawImage(image, position_x - width/2, 
                position_y - height/2, width, height, board);
     }
-    
+    @Override
     public int getX(){
         return this.position_x;
     }
     
+    @Override
     public int getY(){
         return this.position_y;
     }
-   
-    public boolean equals(BombermanSprite otherEntry)
+    @Override
+    public boolean equals(BombermanSpriteInterface otherEntry)
     {
-        return clientName.equals(otherEntry.clientName);
+        return clientName.equals(otherEntry.getName());
     }
-    
+    @Override
     public boolean equals(String otherEntry)
     {
         return clientName.equals(otherEntry);
+    }
+
+    @Override
+    public String getName() {
+        return clientName;
     }
 }
