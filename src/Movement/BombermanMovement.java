@@ -8,7 +8,8 @@ package Movement;
 import Board.Cell;
 import Board.Sprites.CustomSprite;
 import Board.Point;
-import java.util.Map;
+import Board.Map;
+
 
 /**
  *
@@ -19,8 +20,8 @@ public class BombermanMovement extends Movement{
     int size;
     
     public BombermanMovement(int req_dx, int req_dy, int speed, CustomSprite mover,
-            Cell[][] mapCells, int blockSize, int blockCount, int size){
-        super(req_dx, req_dy, speed, mover, mapCells, blockSize, blockCount);
+            Map map, int size){
+        super(req_dx, req_dy, speed, mover, map);
         this.size = size;
     }
     
@@ -62,27 +63,27 @@ public class BombermanMovement extends Movement{
         int x = p.x;
         int y = p.y;
         // We find the cell we are in    
-        int cell_x = (int) Math.floor((double) x / this.blockSize);
-        int cell_y = (int) Math.floor((double) y / this.blockSize);
-        Map<String, Boolean> current = this.mapCells[cell_y][cell_x].getBorders();
+        int cell_x = (int) Math.floor((double) x / this.map.BLOCK_SIZE);
+        int cell_y = (int) Math.floor((double) y / this.map.BLOCK_SIZE);
+        java.util.Map<String, Boolean> current = this.map.getMapCell(cell_y, cell_x).getBorders();
         // We find out destination 
         int d_x, d_y = 0;
         d_x = (x + this.speed * req_dx);
         d_y = (y + this.speed * req_dy);
-        int d_cell_x = (int) Math.floor((((double) d_x) / this.blockSize));
-        int d_cell_y = (int) Math.floor((((double) d_y) / this.blockSize));
+        int d_cell_x = (int) Math.floor((((double) d_x) / this.map.BLOCK_SIZE));
+        int d_cell_y = (int) Math.floor((((double) d_y) / this.map.BLOCK_SIZE));
         // If try to go out of bounds
-        if (d_cell_x < 0 || d_cell_x == this.blockCount || d_cell_y < 0 || d_cell_y == this.blockCount) {
+        if (d_cell_x < 0 || d_cell_x == this.map.N_BLOCKS || d_cell_y < 0 || d_cell_y == this.map.N_BLOCKS) {
             return new Point(0, 0);
         }
 
-        Map<String, Boolean> destination = this.mapCells[d_cell_y][d_cell_x].getBorders();
+        java.util.Map<String, Boolean> destination = this.map.getMapCell(d_cell_y, d_cell_x).getBorders();
         // If destination cell is not the same as origin's
         if (cell_x != d_cell_x || cell_y != d_cell_y) {
             // Going right
             if (req_dx == 1) {
                 if (current.get("right_b") || destination.get("left_b")) {
-                    x = this.mapCells[cell_y][cell_x].getX() + this.blockSize - 1;
+                    x = this.map.getMapCell(cell_y, cell_x).getX() + this.map.BLOCK_SIZE - 1;
                 } else {
                     x = d_x;
                 }
@@ -90,7 +91,7 @@ public class BombermanMovement extends Movement{
             // Going left
             if (req_dx == -1) {
                 if (current.get("left_b") || destination.get("right_b")) {
-                    x = this.mapCells[cell_y][cell_x].getX() + 1;
+                    x = this.map.getMapCell(cell_y, cell_x).getX() + 1;
                 } else {
                     x = d_x;
                 }
@@ -98,7 +99,7 @@ public class BombermanMovement extends Movement{
             // Going up
             if (req_dy == -1) {
                 if (current.get("top_b") || destination.get("bottom_b")) {
-                    y = this.mapCells[cell_y][cell_x].getY() + 1;
+                    y = this.map.getMapCell(cell_y, cell_x).getY() + 1;
                 } else {
                     y = d_y;
                 }
@@ -106,7 +107,7 @@ public class BombermanMovement extends Movement{
             // Going down
             if (req_dy == 1) {
                 if (current.get("bottom_b") || destination.get("top_b")) {
-                    y = this.mapCells[cell_y][cell_x].getY() + this.blockSize - 1;
+                    y = this.map.getMapCell(cell_y, cell_x).getY() + this.map.BLOCK_SIZE - 1;
                 } else {
                     y = d_y;
                 }
