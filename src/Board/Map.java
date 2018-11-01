@@ -6,6 +6,7 @@
 package Board;
 
 import java.util.LinkedList;
+import Board.Sprites.CustomSprite;
 
 /**
  *
