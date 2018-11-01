@@ -6,8 +6,10 @@
 package Board.Sprites;
 
 import Client.ClientBoard;
+import Movement.Movement;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.util.ArrayList;
 
 
 /**
@@ -25,6 +27,9 @@ public interface CustomSprite {
     public void Move(int x, int y);
     public boolean Move(String name, int x, int y);
     
+    // Used to determine movement algorithm
+    public void moveAs();
+    public void addMovement(Movement movement);
 
     public void Tick(Graphics2D g2d);
     

@@ -10,6 +10,8 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import javax.swing.ImageIcon;
 import Board.Sprites.BombermanSprite;
+import Movement.Movement;
+import java.util.ArrayList;
 
 /**
  *
@@ -18,9 +20,14 @@ import Board.Sprites.BombermanSprite;
 public class BombermanSpriteToCustomSpriteAdapter implements CustomSprite {
 
     private BombermanSprite bombermanSprite;
-
+    
     public BombermanSpriteToCustomSpriteAdapter(BombermanSprite bs) {
         bombermanSprite = bs;
+    }
+    
+    @Override
+    public void addMovement(Movement movement){
+        bombermanSprite.addMove(movement);
     }
 
     @Override
@@ -38,6 +45,11 @@ public class BombermanSpriteToCustomSpriteAdapter implements CustomSprite {
         return bombermanSprite.Move(name, x, y);
     }
 
+    @Override
+    public void moveAs(){
+        bombermanSprite.moveAs();
+    }
+    
     @Override
     public void Tick(Graphics2D g2d) {
         bombermanSprite.Tick(g2d);

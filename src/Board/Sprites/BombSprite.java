@@ -9,18 +9,22 @@ import Client.ClientBoard;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import javax.swing.ImageIcon;
+import Movement.Movement;
+import java.util.ArrayList;
 
 /**
  *
  * @author mati
  */
 public class BombSprite {
-     private int height, width, position_x, position_y;
+    private int height, width, position_x, position_y;
     private Image image;
     private int move_x;
     private int move_y;
     private Graphics2D g2d;
     private ClientBoard board;
+    
+    public ArrayList<Movement> moveList =  new ArrayList<Movement>();
 
     public BombSprite(int position_x, int position_y, int height, int width, ClientBoard board) {
         this.height = height;
@@ -56,7 +60,12 @@ public class BombSprite {
             return true;
     }
     
-    
+    public void moveAs(){
+        for(Movement a : moveList) {
+            a.move();
+        }
+        moveList =  new ArrayList<Movement>();
+    }
 
     public void DoTick(Graphics2D g2d) {
         this.g2d = g2d;
