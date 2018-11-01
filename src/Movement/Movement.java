@@ -12,20 +12,18 @@ import Board.Map;
  * @author Vakaris
  */
 public class Movement {
-    int req_dx, req_dy, speed;
+    int speed;
     CustomSprite mover;
     Map map;
     
-    public Movement(int req_dx, int req_dy, int speed, CustomSprite mover, Map map){
-        this.req_dx = req_dx; // Goes left if -1 or right if 1
-        this.req_dy = req_dy; // Goes up if -1 or down ir 1
+    public Movement(int speed, CustomSprite mover, Map map){
         this.speed = speed;   // How many pixels to go. Use blockSize to move whole block
         this.mover = mover;   // Custom sprite of mover
         this.map = map;
     }
     
     public void move(){
-        mover.Move(mover.getX()+(req_dx*this.speed), 
-                mover.getY()+(req_dy*this.speed));
+        mover.Move(mover.getX()+(this.speed), 
+                mover.getY()+(this.speed));
     }
 }

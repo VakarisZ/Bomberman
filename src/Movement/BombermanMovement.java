@@ -19,47 +19,15 @@ public class BombermanMovement extends Movement{
     
     int size;
     
-    public BombermanMovement(int req_dx, int req_dy, int speed, CustomSprite mover,
+    public BombermanMovement(int speed, CustomSprite mover,
             Map map, int size){
-        super(req_dx, req_dy, speed, mover, map);
+        super(speed, mover, map);
         this.size = size;
-    }
-    
-    @Override
-    public void move() {
-        // Bomberman's center point
-        Point bp = new Point(this.mover.getX(), this.mover.getY());
-        int d_x = 0;
-        int d_y = 0;
-        // Create 4 collision detection points
-        Point[] points = Point.getCollisionDetectionPoints(bp.x,
-                bp.y, this.size);
-        Point p1, p2 = new Point(bp.x, bp.y);
-        // If going right we take right points
-        if (req_dx == 1) {
-            p1 = this.pointMovement(points[1]);
-            p2 = this.pointMovement(points[2]);
-        } else if (req_dx == -1) { // If moving left
-            p1 = this.pointMovement(points[0]);
-            p2 = this.pointMovement(points[3]);
-        } else if (req_dy == 1) { // If moving down
-            p1 = this.pointMovement(points[2]);
-            p2 = this.pointMovement(points[3]);
-        } else if (req_dy == -1) { // If moving up
-            p1 = this.pointMovement(points[0]);
-            p2 = this.pointMovement(points[1]);
-        } else {
-            return;
-        }
-        Point destination = Point.closerTo(p1, p2);
-        bp.x = bp.x + destination.x;
-        bp.y = bp.y + destination.y;
-        this.mover.Move(bp.x, bp.y);
     }
 
     // Returns the biggest possible movement of one point in offsets
     // Eg. if point x,y could move 3 to the left it returns Point(-3,0)
-    private Point pointMovement(Point p) {
+    protected Point pointMovement(Point p, int req_dx, int req_dy) {
         int x = p.x;
         int y = p.y;
         // We find the cell we are in    

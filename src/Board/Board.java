@@ -42,7 +42,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import Movement.BombermanMovement;
+import Movement.*;
 
 public class Board extends JPanel implements ActionListener {
 
@@ -182,9 +182,16 @@ public class Board extends JPanel implements ActionListener {
 //                } else {
                     // Create new movement for bomberman
                     bombie.Move(bomberman_x, bomberman_y);
-                    BombermanMovement bombermanMovement = new BombermanMovement(req_dx, req_dy,
-                    BOMBERMAN_SPEED, bombie, map, BOMBERMAN_SIZE);
-                    bombermanMovement.move();
+                    if(req_dx == 1){
+                        bombie.addMovement(new BombermanMovementRight(BOMBERMAN_SPEED, bombie, map, BOMBERMAN_SIZE));
+                    } else if(req_dx == -1){
+                        bombie.addMovement(new BombermanMovementLeft(BOMBERMAN_SPEED, bombie, map, BOMBERMAN_SIZE));
+                    } else if(req_dy == 1){
+                        bombie.addMovement(new BombermanMovementDown(BOMBERMAN_SPEED, bombie, map, BOMBERMAN_SIZE));
+                    } else if(req_dy == -1){
+                        bombie.addMovement(new BombermanMovementUp(BOMBERMAN_SPEED, bombie, map, BOMBERMAN_SIZE));
+                    }
+                    bombie.moveAs();
                     bomberman_x = bombie.getX();
                     bomberman_y = bombie.getY();
                     

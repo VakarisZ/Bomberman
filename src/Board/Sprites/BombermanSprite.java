@@ -6,8 +6,10 @@
 package Board.Sprites;
 
 import Client.ClientBoard;
+import Movement.Movement;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.util.ArrayList;
 import javax.swing.ImageIcon;
 
 
@@ -27,6 +29,8 @@ public class BombermanSprite {
     private Graphics2D g2d;
     private ClientBoard board;
     private String clientName;
+    public ArrayList<Movement> moveList =  new ArrayList<Movement>();
+
     public BombermanSprite(BombermanSprite b){
         this.height = b.height;
         this.width = b.width;
@@ -86,7 +90,17 @@ public class BombermanSprite {
         }
     }
     
+    public void moveAs(){
+        for(Movement a : moveList) {
+            a.move();
+        }
+        moveList =  new ArrayList<Movement>();
+    }
 
+    public void addMove(Movement movement){
+        this.moveList.add(movement);
+    }
+    
     public void Tick(Graphics2D g2d) {
         this.g2d = g2d;
         if (this.moving) {

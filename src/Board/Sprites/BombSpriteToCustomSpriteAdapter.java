@@ -6,6 +6,7 @@
 package Board.Sprites;
 
 import Client.ClientBoard;
+import Movement.Movement;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import javax.swing.ImageIcon;
@@ -22,6 +23,11 @@ public class BombSpriteToCustomSpriteAdapter implements CustomSprite{
     }
 
     @Override
+    public void addMovement(Movement movement){
+        
+    }
+    
+    @Override
     public void ChangeImage(Image image) {
         bombSprite.ChangeImage(image);
     }
@@ -34,6 +40,11 @@ public class BombSpriteToCustomSpriteAdapter implements CustomSprite{
     @Override
     public boolean Move(String name, int x, int y) {
         return bombSprite.Move(name, x, y);
+    }
+    
+    @Override
+    public void moveAs(){
+        bombSprite.moveAs();
     }
 
     @Override
