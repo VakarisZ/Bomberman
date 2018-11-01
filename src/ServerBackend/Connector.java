@@ -92,7 +92,7 @@ public class Connector implements IObserver {
     }
 
     @Override
-    public void Notify(String clientString, int req_dx, int req_dy) {
+    public void Update(String clientString, int req_dx, int req_dy) {
         lock.lock();
         if (Move(clientString, req_dx, req_dy))
         {
@@ -112,7 +112,6 @@ public class Connector implements IObserver {
         lock.unlock();
     }
 
-    @Override
     public void NotifyAll(String clientString) {
         for (MultiClient c : clients)
             {
