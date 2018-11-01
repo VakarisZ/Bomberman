@@ -9,6 +9,7 @@
  */
 package Board;
 
+import Board.Map;
 import Board.Sprites.BombermanSprite;
 import Board.Sprites.CustomSprite;
 import Board.Sprites.BombermanSpriteToCustomSpriteAdapter;
@@ -26,7 +27,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.Map;
 import java.lang.Math;
 import java.util.LinkedList;
 
@@ -53,13 +53,12 @@ public class Board extends JPanel implements ActionListener {
     private final Color dotColor = new Color(192, 192, 0);
     private Color mazeColor;
 
+    private Map map;
+    private int SCREEN_SIZE;
+    
     private boolean inGame = false;
     private boolean dying = false;
 
-    private final int BLOCK_SIZE = 32;
-    private final int N_BLOCKS = 15;
-    private final int SCREEN_SIZE = N_BLOCKS * BLOCK_SIZE;
-    private final int PAC_ANIM_DELAY = 2;
     private final int MAX_GHOSTS = 12;
     private final int BOMBERMAN_SPEED = 3;
     // Determines the dimensions of bomberman collision detection 
@@ -73,7 +72,7 @@ public class Board extends JPanel implements ActionListener {
 
     private Image ghost;
     private Image bomber;
-    private Image bomberman1, bomberman2up, bomberman2left, bomberman2right, bomberman2down;
+    private Image bomberman1;
     private Image bomberman3up, bomberman3down, bomberman3left, bomberman3right;
     private Image bomberman4up, bomberman4down, bomberman4left, bomberman4right;
 
@@ -84,8 +83,6 @@ public class Board extends JPanel implements ActionListener {
     private CustomSprite bombie;
     private Socket server_socket;
     private DataInputStream server_in;
-
-    private final Cell[][] mapCells = Cell.getMapCells(N_BLOCKS, N_BLOCKS, BLOCK_SIZE);
 
     private final int validSpeeds[] = {32};
     private final int maxSpeed = 32;
@@ -127,8 +124,9 @@ public class Board extends JPanel implements ActionListener {
     }
 
     public void initVariables() {
-
-        screenData = new short[N_BLOCKS * N_BLOCKS];
+        map = Map.getInstance();
+        SCREEN_SIZE = map.N_BLOCKS * map.BLOCK_SIZE;
+        screenData = new short[map.N_BLOCKS * map.N_BLOCKS];
         mazeColor = new Color(5, 100, 5);
         d = new Dimension(600, 600);
         ghost_x = new int[MAX_GHOSTS];
@@ -140,8 +138,8 @@ public class Board extends JPanel implements ActionListener {
         dy = new int[4];
         timer = new Timer(40, this);
         timer.start();
-        bomberman_x = BLOCK_SIZE / 2;
-        bomberman_y = BLOCK_SIZE / 2;
+        bomberman_x = map.BLOCK_SIZE / 2;
+        bomberman_y = map.BLOCK_SIZE / 2;
         BombermanSprite bombieTemp =  new BombermanSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y);
         bombie = new BombermanSpriteToCustomSpriteAdapter(bombieTemp);
         sprites.add(bombie);
@@ -185,7 +183,7 @@ public class Board extends JPanel implements ActionListener {
                     // Create new movement for bomberman
                     bombie.Move(bomberman_x, bomberman_y);
                     BombermanMovement bombermanMovement = new BombermanMovement(req_dx, req_dy,
-                    BOMBERMAN_SPEED, bombie, mapCells, BLOCK_SIZE, N_BLOCKS, BOMBERMAN_SIZE);
+                    BOMBERMAN_SPEED, bombie, map, BOMBERMAN_SIZE);
                     bombermanMovement.move();
                     bomberman_x = bombie.getX();
                     bomberman_y = bombie.getY();
@@ -245,85 +243,7 @@ public class Board extends JPanel implements ActionListener {
 
         continueLevel();
     }
-
-    private void moveGhosts(Graphics2D g2d) {
-
-        short i;
-        int pos;
-        int count;
-
-        for (i = 0; i < N_GHOSTS; i++) {
-            if (ghost_x[i] % BLOCK_SIZE == 0 && ghost_y[i] % BLOCK_SIZE == 0) {
-                pos = ghost_x[i] / BLOCK_SIZE + N_BLOCKS * (int) (ghost_y[i] / BLOCK_SIZE);
-
-                count = 0;
-
-                if ((screenData[pos] & 1) == 0 && ghost_dx[i] != 1) {
-                    dx[count] = -1;
-                    dy[count] = 0;
-                    count++;
-                }
-
-                if ((screenData[pos] & 2) == 0 && ghost_dy[i] != 1) {
-                    dx[count] = 0;
-                    dy[count] = -1;
-                    count++;
-                }
-
-                if ((screenData[pos] & 4) == 0 && ghost_dx[i] != -1) {
-                    dx[count] = 1;
-                    dy[count] = 0;
-                    count++;
-                }
-
-                if ((screenData[pos] & 8) == 0 && ghost_dy[i] != -1) {
-                    dx[count] = 0;
-                    dy[count] = 1;
-                    count++;
-                }
-
-                if (count == 0) {
-
-                    if ((screenData[pos] & 15) == 15) {
-                        ghost_dx[i] = 0;
-                        ghost_dy[i] = 0;
-                    } else {
-                        ghost_dx[i] = -ghost_dx[i];
-                        ghost_dy[i] = -ghost_dy[i];
-                    }
-
-                } else {
-
-                    count = (int) (Math.random() * count);
-
-                    if (count > 3) {
-                        count = 3;
-                    }
-
-                    ghost_dx[i] = dx[count];
-                    ghost_dy[i] = dy[count];
-                }
-
-            }
-
-            ghost_x[i] = ghost_x[i] + (ghost_dx[i] * ghostSpeed[i]);
-            ghost_y[i] = ghost_y[i] + (ghost_dy[i] * ghostSpeed[i]);
-            drawGhost(g2d, ghost_x[i] + 1, ghost_y[i] + 1);
-
-            if (bomberman_x > (ghost_x[i] - 12) && bomberman_x < (ghost_x[i] + 12)
-                    && bomberman_y > (ghost_y[i] - 12) && bomberman_y < (ghost_y[i] + 12)
-                    && inGame) {
-
-                dying = true;
-            }
-        }
-    }
-
-    private void drawGhost(Graphics2D g2d, int x, int y) {
-
-        g2d.drawImage(ghost, x, y, this);
-    }
-
+    
 //    private void drawBomberman(Graphics2D g2d) {
 //            g2d.drawImage(bomberman1, bomberman_x - bombermand_x/2, 
 //               bomberman_y - bombermand_y/2, bombermand_x, bombermand_y, this );
@@ -342,30 +262,30 @@ public class Board extends JPanel implements ActionListener {
 
         int x, y;
 
-        for (y = 0; y < SCREEN_SIZE; y += BLOCK_SIZE) {
-            for (x = 0; x < SCREEN_SIZE; x += BLOCK_SIZE) {
+        for (y = 0; y < SCREEN_SIZE; y += map.BLOCK_SIZE) {
+            for (x = 0; x < SCREEN_SIZE; x += map.BLOCK_SIZE) {
 
                 g2d.setColor(mazeColor);
                 g2d.setStroke(new BasicStroke(2));
-                int i = y / BLOCK_SIZE;
-                int j = x / BLOCK_SIZE;
-                Cell cell = mapCells[i][j];
+                int i = y / map.BLOCK_SIZE;
+                int j = x / map.BLOCK_SIZE;
+                Cell cell = map.getMapCell(i, j);
                 if ((cell.getBorders().get("top_b"))) {
-                    g2d.drawLine(x, y, x + BLOCK_SIZE - 1, y);
+                    g2d.drawLine(x, y, x + map.BLOCK_SIZE - 1, y);
                 }
 
                 if ((cell.getBorders().get("right_b"))) {
-                    g2d.drawLine(x + BLOCK_SIZE - 1, y,
-                            x + BLOCK_SIZE - 1, y + BLOCK_SIZE - 1);
+                    g2d.drawLine(x + map.BLOCK_SIZE - 1, y,
+                            x + map.BLOCK_SIZE - 1, y + map.BLOCK_SIZE - 1);
                 }
 
                 if ((cell.getBorders().get("bottom_b"))) {
-                    g2d.drawLine(x, y + BLOCK_SIZE - 1, x + BLOCK_SIZE - 1,
-                            y + BLOCK_SIZE - 1);
+                    g2d.drawLine(x, y + map.BLOCK_SIZE - 1, x + map.BLOCK_SIZE - 1,
+                            y + map.BLOCK_SIZE - 1);
                 }
 
                 if ((cell.getBorders().get("left_b"))) {
-                    g2d.drawLine(x, y, x, y + BLOCK_SIZE - 1);
+                    g2d.drawLine(x, y, x, y + map.BLOCK_SIZE - 1);
                 }
 
             }
@@ -395,8 +315,8 @@ public class Board extends JPanel implements ActionListener {
 
         for (i = 0; i < N_GHOSTS; i++) {
 
-            ghost_y[i] = N_BLOCKS * BLOCK_SIZE - 1;
-            ghost_x[i] = N_BLOCKS * BLOCK_SIZE - 1;
+            ghost_y[i] = map.N_BLOCKS * map.BLOCK_SIZE - 1;
+            ghost_x[i] = map.N_BLOCKS * map.BLOCK_SIZE - 1;
             ghost_dy[i] = 0;
             ghost_dx[i] = dx;
             dx = -dx;
@@ -409,8 +329,8 @@ public class Board extends JPanel implements ActionListener {
             ghostSpeed[i] = 0; //validSpeeds[random];
         }
 
-        bomberman_x = BLOCK_SIZE / 2;
-        bomberman_y = BLOCK_SIZE / 2;
+        bomberman_x = map.BLOCK_SIZE / 2;
+        bomberman_y = map.BLOCK_SIZE / 2;
         req_dx = 0;
         req_dy = 0;
         view_dx = -1;

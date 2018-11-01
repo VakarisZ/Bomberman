@@ -5,6 +5,8 @@
  */
 package Client;
 
+
+import Board.Map;
 import Board.Board;
 import Board.Sprites.BombermanSprite;
 import Board.Sprites.BombermanSpriteToCustomSpriteAdapter;
@@ -22,7 +24,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.Map;
 import java.lang.Math;
 import java.util.LinkedList;
 
@@ -59,10 +60,7 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
     private Image ii;
     private final Color dotColor = new Color(192, 192, 0);
     private Color mazeColor;
-
-    private final int BLOCK_SIZE = 32;
-    private final int N_BLOCKS = 15;
-    private final int SCREEN_SIZE = N_BLOCKS * BLOCK_SIZE;
+    
     private final int PAC_ANIM_DELAY = 2;
     private final int MAX_GHOSTS = 12;
 
@@ -100,8 +98,9 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
     private int[] ghost_x, ghost_y, ghost_dx, ghost_dy, ghostSpeed;
     private LinkedList<CustomSprite> sprites; // = new LinkedList<CustomSprite>();
 
-    private final Cell[][] mapCells = Cell.getMapCells(N_BLOCKS, N_BLOCKS, BLOCK_SIZE);
-
+    private Map map;
+    private int SCREEN_SIZE;
+    
     private final int validSpeeds[] = {32};
     private final int maxSpeed = 32;
     private int currentSpeed = 32;
@@ -122,8 +121,9 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
     }
 
     private void initVariables() {
-
-        screenData = new short[N_BLOCKS * N_BLOCKS];
+        map = Map.getInstance();
+        screenData = new short[map.N_BLOCKS * map.N_BLOCKS];
+        SCREEN_SIZE = map.BLOCK_SIZE * map.N_BLOCKS;
         mazeColor = new Color(5, 100, 5);
         d = new Dimension(600, 600);
         ghost_x = new int[MAX_GHOSTS];
@@ -135,8 +135,8 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
         dy = new int[4];
         timer = new Timer(40, this);
         timer.start();
-        bomberman_x = BLOCK_SIZE / 2;
-        bomberman_y = BLOCK_SIZE / 2;
+        bomberman_x = map.BLOCK_SIZE / 2;
+        bomberman_y = map.BLOCK_SIZE / 2;
 
     }
 
@@ -397,30 +397,30 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
 
         int x, y;
 
-        for (y = 0; y < SCREEN_SIZE; y += BLOCK_SIZE) {
-            for (x = 0; x < SCREEN_SIZE; x += BLOCK_SIZE) {
+        for (y = 0; y < SCREEN_SIZE; y += map.BLOCK_SIZE) {
+            for (x = 0; x < SCREEN_SIZE; x += map.BLOCK_SIZE) {
 
                 g2d.setColor(mazeColor);
                 g2d.setStroke(new BasicStroke(2));
-                int i = y / BLOCK_SIZE;
-                int j = x / BLOCK_SIZE;
-                Cell cell = mapCells[i][j];
+                int i = y / map.BLOCK_SIZE;
+                int j = x / map.BLOCK_SIZE;
+                Cell cell = map.getMapCell(i, j);
                 if ((cell.getBorders().get("top_b"))) {
-                    g2d.drawLine(x, y, x + BLOCK_SIZE - 1, y);
+                    g2d.drawLine(x, y, x + map.BLOCK_SIZE - 1, y);
                 }
 
                 if ((cell.getBorders().get("right_b"))) {
-                    g2d.drawLine(x + BLOCK_SIZE - 1, y,
-                            x + BLOCK_SIZE - 1, y + BLOCK_SIZE - 1);
+                    g2d.drawLine(x + map.BLOCK_SIZE - 1, y,
+                            x + map.BLOCK_SIZE - 1, y + map.BLOCK_SIZE - 1);
                 }
 
                 if ((cell.getBorders().get("bottom_b"))) {
-                    g2d.drawLine(x, y + BLOCK_SIZE - 1, x + BLOCK_SIZE - 1,
-                            y + BLOCK_SIZE - 1);
+                    g2d.drawLine(x, y + map.BLOCK_SIZE - 1, x + map.BLOCK_SIZE - 1,
+                            y + map.BLOCK_SIZE - 1);
                 }
 
                 if ((cell.getBorders().get("left_b"))) {
-                    g2d.drawLine(x, y, x, y + BLOCK_SIZE - 1);
+                    g2d.drawLine(x, y, x, y + map.BLOCK_SIZE - 1);
                 }
 
             }
@@ -450,8 +450,8 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
 
         for (i = 0; i < N_GHOSTS; i++) {
 
-            ghost_y[i] = N_BLOCKS * BLOCK_SIZE - 1;
-            ghost_x[i] = N_BLOCKS * BLOCK_SIZE - 1;
+            ghost_y[i] = map.N_BLOCKS * map.BLOCK_SIZE - 1;
+            ghost_x[i] = map.N_BLOCKS * map.BLOCK_SIZE - 1;
             ghost_dy[i] = 0;
             ghost_dx[i] = dx;
             dx = -dx;
@@ -464,8 +464,8 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
             ghostSpeed[i] = 0; //validSpeeds[random];
         }
 
-        bomberman_x = BLOCK_SIZE / 2;
-        bomberman_y = BLOCK_SIZE / 2;
+        bomberman_x = map.BLOCK_SIZE / 2;
+        bomberman_y = map.BLOCK_SIZE / 2;
         req_dx = 0;
         req_dy = 0;
         view_dx = -1;
