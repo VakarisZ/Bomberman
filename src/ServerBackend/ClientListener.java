@@ -58,6 +58,6 @@ public class ClientListener extends Thread implements IObservable {
     @Override
     public void NotifyObserver(IObserver o) {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        o.Notify(clienString, req_dx, req_dy);
+        o.Update(clienString, req_dx, req_dy);
     }
 }
