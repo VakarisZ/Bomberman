@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Linas
  */
-public class BombTimer {
+public class BombTimer implements Cloneable {
 
     private float timeUntilDetonation;
 
@@ -30,4 +30,15 @@ public class BombTimer {
         TimeUnit.MILLISECONDS.sleep(miliseconds);
         timeUntilDetonation = 0.0f;
     }
+
+    public BombTimer clone() {
+        try {
+            return (BombTimer) super.clone();
+        } catch (CloneNotSupportedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

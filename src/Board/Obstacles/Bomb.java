@@ -52,7 +52,8 @@ public class Bomb extends Obstacle implements Cloneable {
     public Bomb deepCopy() {
         try {
             Bomb dc = (Bomb) super.clone();
-            dc.setExplosionTimer(new BombTimer(this.explosionTimer.getTimeUntilDetonation()));
+            //dc.setExplosionTimer(new BombTimer(this.explosionTimer.getTimeUntilDetonation()));
+            dc.setExplosionTimer(this.explosionTimer.clone());
             return dc;
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(Bomb.class.getName()).log(Level.SEVERE, null, ex);
@@ -60,14 +61,14 @@ public class Bomb extends Obstacle implements Cloneable {
         return null;
     }
 
-     public BombTimer getExplosionTimer() {
+    public BombTimer getExplosionTimer() {
         return explosionTimer;
     }
 
     public void setExplosionTimer(BombTimer explosionTimer) {
         this.explosionTimer = explosionTimer;
     }
-    
+
     public boolean isPlanted() {
         return planted;
     }
@@ -106,6 +107,12 @@ public class Bomb extends Obstacle implements Cloneable {
     public void explode() {
         System.out.println("Board.Obstacles.Bomb.explode()");
         setExploded(true);
+    }
+
+    @Override
+    public String toString() {
+        return "explosionRadius=" + explosionRadius
+                + " | timeUntilDetonation=" + this.explosionTimer.getTimeUntilDetonation();
     }
 
 }
