@@ -50,8 +50,8 @@ public class ClientListener extends Thread implements IObservable {
 
     public void testBombs(int bombType) {
         ObstacleFactory bombFactory = new BombFactory();
-
-//        System.out.println("Select : bi(G) bomb / (S)mall bomb / e(X)it");
+        System.out.println("\nAbstract Factory and prototype START");
+        
         if (bombType == 1 || bombType == 2) {
             Bomb bomb = null;
 
@@ -85,6 +85,7 @@ public class ClientListener extends Thread implements IObservable {
                         + System.identityHashCode(bomb3) + ")");
 
         }
+        System.out.println("Abstract Factory and prototype END\n");
 
     }
 
