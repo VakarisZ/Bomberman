@@ -75,6 +75,9 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
     private int bombermand_x = 32; // Dimensions of the bomberman
     private int bombermand_y = 32;
     private int req_dx, req_dy, view_dx, view_dy;
+    
+    private int req_bomb;
+    
     private CustomSprite bombie;
     private Socket server_socket;
     private DataInputStream server_in;
@@ -292,6 +295,7 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
 
     private void playGame(Graphics2D g2d) {
         try {
+            server_out.writeInt(req_bomb);
             server_out.writeInt(req_dx);
             server_out.writeInt(req_dy);
             server_out.flush();
@@ -495,16 +499,34 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
                 if (key == KeyEvent.VK_LEFT) {
                     req_dx = -1;
                     req_dy = 0;
+                    req_bomb = 0;
                 } else if (key == KeyEvent.VK_RIGHT) {
                     req_dx = 1;
                     req_dy = 0;
+                    req_bomb = 0;
                 } else if (key == KeyEvent.VK_UP) {
                     req_dx = 0;
                     req_dy = -1;
+                    req_bomb = 0;
                 } else if (key == KeyEvent.VK_DOWN) {
                     req_dx = 0;
                     req_dy = 1;
-                } else if (key == KeyEvent.VK_ESCAPE && timer.isRunning()) {
+                    req_bomb = 0;
+                    
+                }
+                else if (key == 'q' || key == 'Q') {
+                    req_dx = 0;
+                    req_dy = 0;
+                    req_bomb = 1;
+                    
+                } 
+                else if (key == 'e' || key == 'E') {
+                    req_dx = 0;
+                    req_dy = 0;
+                    req_bomb = 2;
+                    
+                } 
+                else if (key == KeyEvent.VK_ESCAPE && timer.isRunning()) {
                     inGame = false;
                 } else if (key == KeyEvent.VK_PAUSE) {
                     if (timer.isRunning()) {
@@ -527,9 +549,10 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
             int key = e.getKeyCode();
 
             if (key == KeyEvent.VK_LEFT || key == KeyEvent.VK_RIGHT
-                    || key == KeyEvent.VK_UP || key == KeyEvent.VK_DOWN) {
+                    || key == KeyEvent.VK_UP || key == KeyEvent.VK_DOWN || key == 'e' || key == 'E' || key == 'q' || key == 'Q') {
                 req_dx = 0;
                 req_dy = 0;
+                req_bomb = 0;
             }
         }
     }
