@@ -10,7 +10,7 @@ import java.util.logging.Logger;
  *
  * @author Linas
  */
-public class Bomb extends Obstacle implements Cloneable {
+public class Bomb extends Obstacle implements Cloneable, Runnable {
 
     // explosion radius - how many blocks in all directions will the explosion affect
     private int explosionRadius;
@@ -90,15 +90,9 @@ public class Bomb extends Obstacle implements Cloneable {
      *
      * @throws java.lang.InterruptedException
      */
-    public void drop() throws InterruptedException {
-        System.out.println("Board.Obstacles.Bomb.drop()");
-
-        this.setPlanted(true);
-
-        explosionTimer.start();
-
-        //explode
-        this.explode();
+    public void drop() {
+        Thread thread = new Thread(this);
+        thread.start();
     }
 
     /**
@@ -113,6 +107,24 @@ public class Bomb extends Obstacle implements Cloneable {
     public String toString() {
         return "explosionRadius=" + explosionRadius
                 + " | timeUntilDetonation=" + this.explosionTimer.getTimeUntilDetonation();
+    }
+
+    @Override
+    public void run() {
+        System.out.println("Board.Obstacles.Bomb.drop()");
+
+        this.setPlanted(true);
+
+        int detonateAfter = (int) (explosionTimer.getTimeUntilDetonation() * 1000);
+
+        try {
+            Thread.currentThread().sleep(detonateAfter);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Bomb.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        //explode
+        this.explode();
     }
 
 }

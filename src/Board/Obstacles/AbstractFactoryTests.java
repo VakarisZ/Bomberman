@@ -46,15 +46,9 @@ public class AbstractFactoryTests {
 
                 // <editor-fold defaultstate="collapsed" desc="Bomb drop test">
                 //BOMB DROP TEST
-                /*
-            if (bomb != null) {
-                try {
+                if (bomb != null) {
                     bomb.drop();
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(AbstractFactoryTests.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            }
-                 */
                 // </editor-fold>
                 //<editor-fold defaultstate="collapsed" desc="bomb instace class test">
                 /*
@@ -63,6 +57,7 @@ public class AbstractFactoryTests {
             System.out.println(bomb instanceof Obstacle);
                  */
                 //</editor-fold>
+                /*
                 System.out.println("\nPROTOTYPE START");
                 //PROTOTYPE TEST
                 Bomb bomb2 = bomb.shallowCopy();
@@ -85,7 +80,7 @@ public class AbstractFactoryTests {
                         + " | Bomb3 (deep copy)     ("
                         + System.identityHashCode(bomb3) + ")");
                 System.out.println("PROTOTYPE END\n");
-                
+                 */
                 //<editor-fold defaultstate="collapsed" desc="Prototype measurements">
                 // prototype measurements
                 /*
