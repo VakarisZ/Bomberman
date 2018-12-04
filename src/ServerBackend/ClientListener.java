@@ -51,18 +51,21 @@ public class ClientListener extends Thread implements IObservable {
     public void testBombs(int bombType) {
         ObstacleFactory bombFactory = new BombFactory();
         System.out.println("\nAbstract Factory and prototype START");
-        
+
         if (bombType == 1 || bombType == 2) {
             Bomb bomb = null;
 
-            //BombFactory bfact = new BombFactory();
             if (bombType == 1) {
                 bomb = (Bomb) bombFactory.createObstacle(ObstacleType.BigBomb);
-                //bomb = bfact.createObstacle("BigBomb");
             } else if (bombType == 2) {
                 bomb = (Bomb) bombFactory.createObstacle(ObstacleType.SmallBomb);
             }
             
+            if (bomb != null) {
+                bomb.drop();
+            }
+            
+            /*
             System.out.println("Created " + bomb.getClass() + " with parameters:" + bomb.toString());
             Bomb bomb2 = bomb.shallowCopy();
                 Bomb bomb3 = null;
@@ -83,7 +86,7 @@ public class ClientListener extends Thread implements IObservable {
                         + System.identityHashCode(bomb3.getExplosionTimer())
                         + " | Bomb3 (deep copy)     ("
                         + System.identityHashCode(bomb3) + ")");
-
+             */
         }
         System.out.println("Abstract Factory and prototype END\n");
 
@@ -100,7 +103,7 @@ public class ClientListener extends Thread implements IObservable {
         if (req_dx != 0 || req_dy != 0) {
             NotifyObserver(observer);
         }
-        if (req_bomb != 0){
+        if (req_bomb != 0) {
             testBombs(req_bomb);
         }
 
