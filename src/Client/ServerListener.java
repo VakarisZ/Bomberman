@@ -50,6 +50,11 @@ public class ServerListener extends Thread{
                         y = infromServer.readInt();
                         listener.addEnemySprite(clientName, x, y);
                         listener.moveOther(clientName, x, y);
+                    case(10):
+                        x = infromServer.readInt();
+                        y = infromServer.readInt();
+                        clientName = infromServer.readUTF();
+                        listener.addBomb(clientName, x, y);
                         
                         
                 }

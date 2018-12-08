@@ -41,14 +41,11 @@ public class AbstractFactoryTests {
                 } else if (userInput.toUpperCase().equals("S")) {
                     bomb = (Bomb) bombFactory.createObstacle(ObstacleType.SmallBomb);
                 }
-                System.out.println("Created " + bomb.getClass() + " with parameters:" + bomb.toString());
+                //System.out.println("Created " + bomb.getClass() + " with parameters:" + bomb.toString());
                 System.out.println("ABSTRACT FACTORY END\n");
 
                 // <editor-fold defaultstate="collapsed" desc="Bomb drop test">
                 //BOMB DROP TEST
-                if (bomb != null) {
-                    bomb.drop();
-                }
                 // </editor-fold>
                 //<editor-fold defaultstate="collapsed" desc="bomb instace class test">
                 /*

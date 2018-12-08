@@ -1,6 +1,7 @@
 package Board.Obstacles;
 
 // TimeUnit - used for delay
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -10,12 +11,13 @@ import java.util.logging.Logger;
  *
  * @author Linas
  */
-public class Bomb extends Obstacle implements Cloneable, Runnable {
+public class Bomb extends BombDropper implements Cloneable {
 
     // explosion radius - how many blocks in all directions will the explosion affect
     private int explosionRadius;
     // explosion timer - time until the bomb explodes (SECONDS)
     private BombTimer explosionTimer;
+    // How do we know who put the bomb?
 
     // is the bomb planted (dropped)
     private boolean planted = false;
@@ -23,8 +25,9 @@ public class Bomb extends Obstacle implements Cloneable, Runnable {
     private boolean exploded = false;
 
     public Bomb(boolean destructable, boolean walkable,
-            int explosionRadius, float timeUntilDetonation) {
-        super(destructable, walkable);
+            int explosionRadius, float timeUntilDetonation, String clientString,
+            int x, int y) {
+        super(destructable, walkable, clientString, x, y);
         this.explosionRadius = explosionRadius;
         this.explosionTimer = new BombTimer(timeUntilDetonation);
     }
@@ -73,36 +76,25 @@ public class Bomb extends Obstacle implements Cloneable, Runnable {
         return planted;
     }
 
-    public void setPlanted(boolean planted) {
-        this.planted = planted;
-    }
-
     public boolean isExploded() {
         return exploded;
     }
 
+    @Override
     public void setExploded(boolean exploded) {
         this.exploded = exploded;
     }
-
-    /**
-     * Bomb dropping method
-     *
-     * @throws java.lang.InterruptedException
-     */
-    public void drop() {
-        Thread thread = new Thread(this);
-        thread.start();
+    
+    @Override
+    public void setPlanted(boolean planted) {
+        this.planted = planted;
     }
 
-    /**
-     * Bomb explosion method
-     */
-    public void explode() {
-        System.out.println("Board.Obstacles.Bomb.explode()");
-        setExploded(true);
+    @Override
+    public int getDetonationTime(){
+        return (int) (explosionTimer.getTimeUntilDetonation() * 1000);
     }
-
+    
     @Override
     public String toString() {
         return "explosionRadius=" + explosionRadius
@@ -110,21 +102,15 @@ public class Bomb extends Obstacle implements Cloneable, Runnable {
     }
 
     @Override
-    public void run() {
-        System.out.println("Board.Obstacles.Bomb.drop()");
-
-        this.setPlanted(true);
-
-        int detonateAfter = (int) (explosionTimer.getTimeUntilDetonation() * 1000);
-
-        try {
-            Thread.currentThread().sleep(detonateAfter);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Bomb.class.getName()).log(Level.SEVERE, null, ex);
+    public boolean addToServer(ArrayList<Bomb> bombs, 
+            String clientString, int x, int y){
+        if(super.countClientBombs(bombs, clientString) < MAX_BOMBS){
+            Bomb bomb = new Bomb(false, true, 2, 2.0f, clientString, x, y);
+            bombs.add(bomb);
+            return true;
+        } else {
+            return false;
         }
-
-        //explode
-        this.explode();
     }
-
+    
 }

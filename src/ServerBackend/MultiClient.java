@@ -5,6 +5,7 @@
  */
 package ServerBackend;
 
+import Board.Obstacles.Bomb;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.net.Socket;
 import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
 
 /**
  *
@@ -29,6 +31,7 @@ public class MultiClient extends Thread {
     public int currentSpeed = 32;
     public ClientListener cl;
     IObserver obs;
+    public ArrayList<Bomb> bombs = new ArrayList<>();
 
     MultiClient() throws IOException {
 
@@ -78,6 +81,19 @@ public class MultiClient extends Thread {
             Logger.getLogger(MultiClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+    }
+    
+    public void addBomb(Bomb bomb){
+        bombs.add(bomb);
+        try {
+            outtoClient.writeInt(10);
+            outtoClient.writeInt(bomb.x);
+            outtoClient.writeInt(bomb.y);
+            outtoClient.writeUTF(bomb.clientString);
+            outtoClient.flush();
+        } catch (IOException ex) {
+            Logger.getLogger(MultiClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
 //    public void move(int x, int y, Queue<MultiClient> clientsMoved) {

@@ -44,7 +44,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import Movement.*;
 
-public class Board extends JPanel implements ActionListener {
+public class Board extends JPanel{
 
     private Dimension d;
     private final Font smallFont = new Font("Helvetica", Font.BOLD, 14);
@@ -110,8 +110,6 @@ public class Board extends JPanel implements ActionListener {
 
     private void initBoard() {
 
-        addKeyListener(new TAdapter());
-
         setFocusable(true);
 
         setBackground(Color.black);
@@ -123,6 +121,10 @@ public class Board extends JPanel implements ActionListener {
 //        }
     }
 
+    public void addBomb(){
+        
+    }
+    
     public void initVariables() {
         map = Map.getInstance();
         SCREEN_SIZE = map.N_BLOCKS * map.BLOCK_SIZE;
@@ -136,8 +138,6 @@ public class Board extends JPanel implements ActionListener {
         ghostSpeed = new int[MAX_GHOSTS];
         dx = new int[4];
         dy = new int[4];
-        timer = new Timer(40, this);
-        timer.start();
         bomberman_x = map.BLOCK_SIZE / 2;
         bomberman_y = map.BLOCK_SIZE / 2;
         BombermanSprite bombieTemp =  new BombermanSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y);
@@ -250,20 +250,6 @@ public class Board extends JPanel implements ActionListener {
 
         continueLevel();
     }
-    
-//    private void drawBomberman(Graphics2D g2d) {
-//            g2d.drawImage(bomberman1, bomberman_x - bombermand_x/2, 
-//               bomberman_y - bombermand_y/2, bombermand_x, bombermand_y, this );
-//        
-//    }
-//    private void drawMovingBomberman(Graphics2D g2d) {
-//        for (int i = 0; i < BOMBERMAN_MOVE_STEPS; i++){
-//            bomberman_x += (req_dx * bombermand_x / BOMBERMAN_MOVE_STEPS);
-//            bomberman_y += (req_dy * bombermand_y / BOMBERMAN_MOVE_STEPS);
-//            drawBomberman(g2d);
-//        }
-//        
-//    }
 
     private void drawMaze(Graphics2D g2d) {
 
@@ -379,61 +365,5 @@ public class Board extends JPanel implements ActionListener {
         g2d.drawImage(ii, 5, 5, this);
         Toolkit.getDefaultToolkit().sync();
         g2d.dispose();
-    }
-
-    class TAdapter extends KeyAdapter {
-
-        @Override
-        public void keyPressed(KeyEvent e) {
-
-            int key = e.getKeyCode();
-
-            if (inGame) {
-                if (key == KeyEvent.VK_LEFT) {
-                    req_dx = -1;
-                    req_dy = 0;
-                } else if (key == KeyEvent.VK_RIGHT) {
-                    req_dx = 1;
-                    req_dy = 0;
-                } else if (key == KeyEvent.VK_UP) {
-                    req_dx = 0;
-                    req_dy = -1;
-                } else if (key == KeyEvent.VK_DOWN) {
-                    req_dx = 0;
-                    req_dy = 1;
-                } else if (key == KeyEvent.VK_ESCAPE && timer.isRunning()) {
-                    inGame = false;
-                } else if (key == KeyEvent.VK_PAUSE) {
-                    if (timer.isRunning()) {
-                        timer.stop();
-                    } else {
-                        timer.start();
-                    }
-                }
-            } else {
-                if (key == 's' || key == 'S') {
-                    inGame = true;
-                    initGame();
-                }
-            }
-        }
-
-        @Override
-        public void keyReleased(KeyEvent e) {
-
-            int key = e.getKeyCode();
-
-            if (key == KeyEvent.VK_LEFT || key == KeyEvent.VK_RIGHT
-                    || key == KeyEvent.VK_UP || key == KeyEvent.VK_DOWN) {
-                req_dx = 0;
-                req_dy = 0;
-            }
-        }
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-        repaint();
     }
 }
