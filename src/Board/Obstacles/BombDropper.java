@@ -40,7 +40,7 @@ public abstract class BombDropper extends Obstacle implements Runnable {
     public final boolean dropBomb(ArrayList<Bomb> bombs){
         boolean added = addToServer(bombs, clientString, x, y);
         if (added){
-            System.out.println("Bomb dropped using TEMPLATE METHOD");
+            // System.out.println("Bomb dropped using TEMPLATE METHOD");
             this.setPlanted(true);
             Thread thread = new Thread(this);
             thread.start();

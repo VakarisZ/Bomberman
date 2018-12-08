@@ -16,17 +16,12 @@ import Board.Sprites.BombermanSpriteToCustomSpriteAdapter;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Event;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.lang.Math;
 import java.util.LinkedList;
 
@@ -34,15 +29,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import Board.Cell;
-import Board.Point;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import Movement.*;
+import Enemies.*;
+import java.util.Iterator;
 
 public class Board extends JPanel{
 
@@ -89,6 +83,9 @@ public class Board extends JPanel{
     public int currentSpeed = 32;
     private short[] screenData;
     private Timer timer;
+    
+    private GhostContainer ghosts;
+    private BotContainer bots;
 
     public Board() {
 
@@ -143,6 +140,13 @@ public class Board extends JPanel{
         BombermanSprite bombieTemp =  new BombermanSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y);
         bombie = new BombermanSpriteToCustomSpriteAdapter(bombieTemp);
         sprites.add(bombie);
+        
+        ghosts = new GhostContainer(1);
+        bots = new BotContainer();
+        
+        ghosts.AddGhost(0, 0);
+        bots.addBot(10, 10, 5);
+        bots.addBot(30, 30, 5);
     }
 
     @Override
@@ -205,6 +209,20 @@ public class Board extends JPanel{
 //        }
     }
 
+    public void moveEnemies(){
+        Iterator ghostIter = ghosts.createIterator();
+        Iterator botIter = bots.createIterator();
+        moveEnemies(ghostIter);
+        moveEnemies(botIter);
+    }
+    
+    private void moveEnemies(Iterator iterator){
+        while(iterator.hasNext()) {
+            Enemy enemy = (Enemy) iterator.next();
+            enemy.move();
+        }
+    }
+    
     private void showIntroScreen(Graphics2D g2d) {
 
         g2d.setColor(new Color(0, 32, 48));

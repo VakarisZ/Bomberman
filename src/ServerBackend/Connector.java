@@ -109,6 +109,7 @@ public class Connector implements IObserver {
 
     @Override
     public void Update(String clientString, int req_dx, int req_dy, int req_bomb) {
+        board.moveEnemies();
         lock.lock();
         if (Move(clientString, req_dx, req_dy))
         {
