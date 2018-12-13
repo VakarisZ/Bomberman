@@ -15,14 +15,14 @@ import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Mariadb {
+public class Mariadb implements Database {
 
     //  Database credentials
-    static final String USER = "bomb";
-    static final String PASS = "root";
-    private static Connection con;
+    final String USER = "bomb";
+    final String PASS = "root";
+    private Connection con;
 
-    public static void main(String[] args) {
+    public void main(String[] args) {
         InitConnection();
         InitDatabase();
         testDB();
@@ -30,7 +30,12 @@ public class Mariadb {
 
     }//end main
 
-    public static void InitConnection() {
+    public void InitDB(){
+        InitConnection();
+        InitDatabase();
+        
+    }
+    public void InitConnection() {
         try {//You need to have mariadb jdbc driver installed. 
             //https://mariadb.com/kb/en/library/about-mariadb-connector-j/
             Class.forName("org.mariadb.jdbc.Driver");
@@ -50,7 +55,7 @@ public class Mariadb {
         }
     }
 
-    public static void CloseConnection() {
+    public void CloseConnection() {
         try {
             con.close();
         } catch (SQLException ex) {
@@ -58,7 +63,7 @@ public class Mariadb {
         }
     }
 
-    private static ResultSet ExecuteQuery(String query) {
+    public ResultSet ExecuteQuery(String query) {
         ResultSet rs = null;
         try {
             Statement stmt = con.createStatement();
@@ -69,7 +74,7 @@ public class Mariadb {
         return rs;
     }
 
-    private static void ExecuteUpdate(String query) {
+    public void ExecuteUpdate(String query) {
         try {
             Statement stmt = con.createStatement();
             stmt.executeUpdate(query);
@@ -78,13 +83,13 @@ public class Mariadb {
         }
     }
 
-    private static void ExecuteUpdate(String[] queries) {
+    public void ExecuteUpdate(String[] queries) {
         for (int i = 0; i < queries.length; i++) {
             ExecuteUpdate(queries[i]);
         }
     }
 
-    public static void InitDatabase() {
+    public void InitDatabase() {
         String create_usertable = loadResource("queries/usertable.sql");
         String drop_table = "DROP TABLE IF EXISTS `users`;";
         ExecuteQuery(drop_table);
@@ -92,7 +97,7 @@ public class Mariadb {
 
     }
 
-    public static String loadResource(String filename) {
+    public String loadResource(String filename) {
         FileInputStream f = null;
         try {
             f = new FileInputStream(filename);
@@ -118,7 +123,7 @@ public class Mariadb {
         return streamString;
     }
 
-    public static void testDB() {
+    public void testDB() {
         String test_data = loadResource("queries/filling_users.sql");
         String[] entries = test_data.split("\n");
         ExecuteUpdate(entries);
