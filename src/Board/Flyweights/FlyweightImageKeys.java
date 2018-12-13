@@ -10,5 +10,5 @@ package Board.Flyweights;
  * @author Linas
  */
 public enum FlyweightImageKeys {
-    BigBomb, SmallBomb
+    BigBomb, SmallBomb, Player, Enemy
 }
