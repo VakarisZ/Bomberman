@@ -47,6 +47,7 @@ public class MultiClient extends Thread {
         int [] coordinates = state.getSavedState();
         bomberman_x = coordinates[0];
         bomberman_y = coordinates[1];
+        moveSelf(bomberman_x, bomberman_y);
     }
     public void run() {
         try {

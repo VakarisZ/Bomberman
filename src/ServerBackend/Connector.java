@@ -39,6 +39,8 @@ public class Connector implements IObserver {
     ClientConnector cc;// = new ClientConnector(2);
     Board board;
     public Graphics2D g2d_placeholder;
+    private int memento_test = -1;
+    private MultiClientMemento savedState;
 //    Queue<MultiClient> clients;// = new ConcurrentLinkedQueue<MultiClient>();
     Queue<MultiClient> clients = new ConcurrentLinkedQueue<MultiClient>();
     public Connector() {
@@ -96,12 +98,24 @@ public class Connector implements IObserver {
         lock.lock();
         if (Move(clientString, req_dx, req_dy))
         {
-            
+           
             for (MultiClient c : clients)
             {
                 if (c.isClientName(clientString))
                 {
                     c.moveSelf(board.bomberman_x, board.bomberman_y);
+                    if (memento_test == 15) 
+                    {
+                        memento_test--;
+                        savedState = c.saveState();
+                    }
+                    else if (memento_test < 15 && memento_test != 0){
+                        memento_test--;
+                    }
+                    else if (memento_test == 0){
+                        c.setState(savedState);
+                    }
+                    
                     break;
                 }
             }
@@ -117,6 +131,18 @@ public class Connector implements IObserver {
             {
                 if (!c.isClientName(clientString))
                 {
+//                    if (memento_test == 15) 
+//                    {
+//                        savedState = c.saveState();
+//                        memento_test--;
+//                    }
+//                    else if (memento_test < 15 && memento_test != 0){
+//                        memento_test--;
+//                    }
+//                    else{
+//                        c.setState(savedState);
+//                    }
+//                    System.out.print(memento_test);
                     c.MoveKnownClient(clientString, board.bomberman_x, board.bomberman_y);
                 }
             }
