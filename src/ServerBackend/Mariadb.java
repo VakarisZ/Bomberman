@@ -78,6 +78,7 @@ public class Mariadb implements Database {
         try {
             Statement stmt = con.createStatement();
             stmt.executeUpdate(query);
+            con.commit();
         } catch (SQLException ex) {
             Logger.getLogger(Mariadb.class.getName()).log(Level.SEVERE, null, ex);
         }

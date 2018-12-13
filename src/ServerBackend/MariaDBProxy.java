@@ -42,7 +42,7 @@ public class MariaDBProxy implements Database {
     private void InitMDB(){
         mdb = new Mariadb();
         mdb.InitConnection();
-        mdb.InitDatabase();
+//        mdb.InitDatabase();
     }
     
 }
