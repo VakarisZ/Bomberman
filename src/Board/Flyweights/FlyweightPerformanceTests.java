@@ -97,16 +97,16 @@ public class FlyweightPerformanceTests extends JFrame implements ActionListener 
     public void actionPerformed(ActionEvent e) {
 
         Graphics g = drawingPanel.getGraphics();
- /*
+        /*
         drawSingleSprite();
         
         g.clearRect(0, 0, drawingPanel.getWidth(), drawingPanel.getHeight());
         Runtime.getRuntime().gc();
-*/
-        drawManySprites(); //uses drawSinglePlane()
+         */
+        drawManySprites();
         g.clearRect(0, 0, drawingPanel.getWidth(), drawingPanel.getHeight());
         Runtime.getRuntime().gc();
-        
+
         drawManyClassSprites();
         Runtime.getRuntime().gc();
         g.clearRect(0, 0, drawingPanel.getWidth(), drawingPanel.getHeight());
@@ -114,7 +114,7 @@ public class FlyweightPerformanceTests extends JFrame implements ActionListener 
         drawManyFactorySprites();
         Runtime.getRuntime().gc();
         g.clearRect(0, 0, drawingPanel.getWidth(), drawingPanel.getHeight());
-        
+
     }
 
     public void drawSingleSprite() {
@@ -153,12 +153,12 @@ public class FlyweightPerformanceTests extends JFrame implements ActionListener 
         long afterUsedMem = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long KB = (afterUsedMem - beforeUsedMem) >> 10;
         long MB = KB >> 10;
-        System.out.println("Class planes draw took: " + (endTime - startTime) + "ms");
-        System.out.println("Class plane memory utilized: " + (afterUsedMem - beforeUsedMem) + "bytes | " + MB + " MB");
+        System.out.println("Class sprites draw took: " + (endTime - startTime) + "ms");
+        System.out.println("Class sprite memory utilized: " + (afterUsedMem - beforeUsedMem) + "bytes | " + MB + " MB");
     }
-    
+
     public void drawManyFactorySprites() {
-        System.out.println("/n Flyweight example");
+        System.out.println("");
         long startTime = System.currentTimeMillis();
         long beforeUsedMem = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 
@@ -173,8 +173,8 @@ public class FlyweightPerformanceTests extends JFrame implements ActionListener 
         long afterUsedMem = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long KB = (afterUsedMem - beforeUsedMem) >> 10;
         long MB = KB >> 10;
-        System.out.println("Flyweight Factory planes draw took: " + (endTime - startTime) + "ms");
-        System.out.println("FlyWeight plane memory utilized: " + (afterUsedMem - beforeUsedMem) + "bytes | " + MB + " MB");
+        System.out.println("Flyweight Factory sprites draw took: " + (endTime - startTime) + "ms");
+        System.out.println("FlyWeight sprite memory utilized: " + (afterUsedMem - beforeUsedMem) + "bytes | " + MB + " MB");
         System.out.println("");
     }
 
