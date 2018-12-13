@@ -5,6 +5,9 @@
  */
 package Board.Sprites;
 
+import Board.Flyweights.FlyweightImage;
+import Board.Flyweights.FlyweightImageFactory;
+import Board.Flyweights.FlyweightImageKeys;
 import Client.ClientBoard;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -31,7 +34,18 @@ public class BombSprite {
         this.width = width;
         this.position_x = position_x;
         this.position_y = position_y;
+        
+        /*
+        // OLD - no flyweight
         this.image = new ImageIcon("images/bomb1.png").getImage();
+        System.out.println(System.identityHashCode(this.image));
+        */
+        
+        // FLYWEIGHT
+        FlyweightImage fi = FlyweightImageFactory.getFlyweightImage(FlyweightImageKeys.BigBomb);
+        this.image = fi.getImage();
+        //System.out.println(System.identityHashCode(fi.getImage()));
+        
         this.board = board;
     }
     
