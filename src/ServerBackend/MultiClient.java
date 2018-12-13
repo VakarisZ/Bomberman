@@ -40,7 +40,14 @@ public class MultiClient extends Thread {
         infromClient = new DataInputStream(s.getInputStream());
         outtoClient = new DataOutputStream(s.getOutputStream());
     }
-
+    public MultiClientMemento saveState(){
+        return new MultiClientMemento(bomberman_x, bomberman_y);
+    }
+    public void setState(MultiClientMemento state){
+        int [] coordinates = state.getSavedState();
+        bomberman_x = coordinates[0];
+        bomberman_y = coordinates[1];
+    }
     public void run() {
         try {
             clientName = infromClient.readUTF();
