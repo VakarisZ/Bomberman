@@ -8,7 +8,7 @@ package ServerBackend;
 import Board.Board;
 import com.sun.media.sound.WaveFloatFileReader;
 import java.awt.Graphics2D;
-import java.io.DataInputStream;
+import Board.Obstacles.Bomb;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,18 +24,17 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
+import Encryption.*;
 
 /**
  *
  * @author mati
  */
 
-
-
-
 public class Connector implements IObserver {
     Lock lock = new ReentrantLock();
-
+    ArrayList<Bomb> bombs = new ArrayList<>();
     ClientConnector cc;// = new ClientConnector(2);
     Board board;
     public Graphics2D g2d_placeholder;
@@ -60,6 +59,24 @@ public class Connector implements IObserver {
             cc.start();
         } catch (IOException ex) {
             Logger.getLogger(ClientConnector.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public Bomb DropBomb(String clientString, int req_bomb){
+        boolean dropped = false;
+        Bomb bomb = null;
+        for (MultiClient c : clients){
+            if (c.isClientName(clientString))
+            {
+                bomb = new Bomb(false, true, 2, 2.0f, clientString,
+                        c.bomberman_x, c.bomberman_y);
+                dropped = bomb.dropBomb(bombs);
+            }
+        }
+        if (dropped){
+            return bomb;
+        } else {
+            return null;
         }
     }
     
@@ -94,7 +111,8 @@ public class Connector implements IObserver {
     }
 
     @Override
-    public void Update(String clientString, int req_dx, int req_dy) {
+    public void Update(String clientString, int req_dx, int req_dy, int req_bomb) {
+        board.moveEnemies();
         lock.lock();
         if (Move(clientString, req_dx, req_dy))
         {
@@ -120,8 +138,17 @@ public class Connector implements IObserver {
                 }
             }
             NotifyAll(clientString);
-            
-            
+        }
+        if (req_bomb != 0)
+        {
+            Bomb bomb = DropBomb(clientString, req_bomb);
+            if (bomb != null){
+                for (MultiClient c : clients)
+                {
+                    c.addBomb(bomb);
+                    break;
+                }
+            }
         }
         lock.unlock();
     }

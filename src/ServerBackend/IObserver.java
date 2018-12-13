@@ -11,7 +11,7 @@ package ServerBackend;
  */
 public interface IObserver {
     public void Update(IObservable o);
-    public void Update(String clientString, int req_dx, int req_dy);
+    public void Update(String clientString, int req_dx, int req_dy, int req_bomb);
 //    public void NotifyAll(String clientString);
     
 }

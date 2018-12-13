@@ -5,6 +5,7 @@
  */
 package ServerBackend;
 
+import Board.Obstacles.Bomb;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -12,6 +13,8 @@ import java.net.Socket;
 import java.util.Queue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
+import Encryption.*;
 
 /**
  *
@@ -29,6 +32,7 @@ public class MultiClient extends Thread {
     public int currentSpeed = 32;
     public ClientListener cl;
     IObserver obs;
+    public ArrayList<Bomb> bombs = new ArrayList<>();
 
     MultiClient() throws IOException {
 
@@ -86,6 +90,34 @@ public class MultiClient extends Thread {
             Logger.getLogger(MultiClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+    }
+    
+    public void addBomb(Bomb bomb){
+        bombs.add(bomb);
+        try {
+            /*
+            System.out.println("Encrypting client string "+bomb.clientString);
+            Expression clientString = new StringExpression(bomb.clientString);
+            Expression e1 = new PushRight(5, clientString);
+            Expression e2 = new PushRight(3, e1);
+            Expression e3 = new PushLeft(15, e2);
+            String secure = e3.encrypt();
+            System.out.println("Encrypted client string "+secure);
+            
+            Encryption encryption = new Encryption();
+            String d1 = encryption.encryptText(secure, 15, false, false);
+            String d2 = encryption.encryptText(d1, 3, true, false);
+            String decrypted = encryption.encryptText(d2, 5, true, false);
+            System.out.println("Decrypted client string "+decrypted);
+            */
+            outtoClient.writeInt(10);
+            outtoClient.writeInt(bomb.x);
+            outtoClient.writeInt(bomb.y);
+            outtoClient.writeUTF(bomb.clientString);
+            outtoClient.flush();
+        } catch (IOException ex) {
+            Logger.getLogger(MultiClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
 //    public void move(int x, int y, Queue<MultiClient> clientsMoved) {

@@ -23,7 +23,6 @@ import java.util.logging.Logger;
  * @author mati
  */
 public class ClientListener extends Thread implements IObservable {
-
     public String clientName;
     DataInputStream infromClient;
     int req_dx, req_dy;
@@ -48,47 +47,6 @@ public class ClientListener extends Thread implements IObservable {
 
     }
 
-    public void testBombs(int bombType) {
-        ObstacleFactory bombFactory = new BombFactory();
-        System.out.println("\nAbstract Factory and prototype START");
-        
-        if (bombType == 1 || bombType == 2) {
-            Bomb bomb = null;
-
-            //BombFactory bfact = new BombFactory();
-            if (bombType == 1) {
-                bomb = (Bomb) bombFactory.createObstacle(ObstacleType.BigBomb);
-                //bomb = bfact.createObstacle("BigBomb");
-            } else if (bombType == 2) {
-                bomb = (Bomb) bombFactory.createObstacle(ObstacleType.SmallBomb);
-            }
-            
-            System.out.println("Created " + bomb.getClass() + " with parameters:" + bomb.toString());
-            Bomb bomb2 = bomb.shallowCopy();
-                Bomb bomb3 = null;
-                if (bombType == 1) {
-                    bomb3 = (Bomb) bombFactory.createObstacle(ObstacleType.BigBomb);
-                } else if (bombType == 2) {
-                    bomb3 = (Bomb) bombFactory.createObstacle(ObstacleType.SmallBomb);
-                }
-                System.out.println("explosionTimer id:"
-                        + System.identityHashCode(bomb.getExplosionTimer())
-                        + " | Bomb (original)       ("
-                        + System.identityHashCode(bomb) + ")");
-                System.out.println("explosionTimer id:"
-                        + System.identityHashCode(bomb2.getExplosionTimer())
-                        + " | Bomb2 (shallow copy)  ("
-                        + System.identityHashCode(bomb2) + ")");
-                System.out.println("explosionTimer id:"
-                        + System.identityHashCode(bomb3.getExplosionTimer())
-                        + " | Bomb3 (deep copy)     ("
-                        + System.identityHashCode(bomb3) + ")");
-
-        }
-        System.out.println("Abstract Factory and prototype END\n");
-
-    }
-
     public void getReq() {
         try {
             req_bomb = infromClient.readInt();
@@ -100,8 +58,8 @@ public class ClientListener extends Thread implements IObservable {
         if (req_dx != 0 || req_dy != 0) {
             NotifyObserver(observer);
         }
-        if (req_bomb != 0){
-            testBombs(req_bomb);
+        if (req_bomb != 0) {
+            NotifyObserver(observer);
         }
 
     }
@@ -109,6 +67,6 @@ public class ClientListener extends Thread implements IObservable {
     @Override
     public void NotifyObserver(IObserver o) {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        o.Update(clienString, req_dx, req_dy);
+        o.Update(clienString, req_dx, req_dy, req_bomb);
     }
 }

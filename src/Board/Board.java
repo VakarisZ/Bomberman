@@ -16,17 +16,12 @@ import Board.Sprites.BombermanSpriteToCustomSpriteAdapter;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Event;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.lang.Math;
 import java.util.LinkedList;
 
@@ -34,17 +29,16 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import Board.Cell;
-import Board.Point;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import Movement.*;
+import Enemies.*;
+import java.util.Iterator;
 
-public class Board extends JPanel implements ActionListener {
+public class Board extends JPanel{
 
     private Dimension d;
     private final Font smallFont = new Font("Helvetica", Font.BOLD, 14);
@@ -89,6 +83,9 @@ public class Board extends JPanel implements ActionListener {
     public int currentSpeed = 32;
     private short[] screenData;
     private Timer timer;
+    
+    private GhostContainer ghosts;
+    private BotContainer bots;
 
     public Board() {
 
@@ -110,8 +107,6 @@ public class Board extends JPanel implements ActionListener {
 
     private void initBoard() {
 
-        addKeyListener(new TAdapter());
-
         setFocusable(true);
 
         setBackground(Color.black);
@@ -123,6 +118,10 @@ public class Board extends JPanel implements ActionListener {
 //        }
     }
 
+    public void addBomb(){
+        
+    }
+    
     public void initVariables() {
         map = Map.getInstance();
         SCREEN_SIZE = map.N_BLOCKS * map.BLOCK_SIZE;
@@ -136,13 +135,18 @@ public class Board extends JPanel implements ActionListener {
         ghostSpeed = new int[MAX_GHOSTS];
         dx = new int[4];
         dy = new int[4];
-        timer = new Timer(40, this);
-        timer.start();
         bomberman_x = map.BLOCK_SIZE / 2;
         bomberman_y = map.BLOCK_SIZE / 2;
         BombermanSprite bombieTemp =  new BombermanSprite(bomberman_x, bomberman_y, bombermand_x, bombermand_y);
         bombie = new BombermanSpriteToCustomSpriteAdapter(bombieTemp);
         sprites.add(bombie);
+        
+        ghosts = new GhostContainer(1);
+        bots = new BotContainer();
+        
+        ghosts.AddGhost(0, 0);
+        bots.addBot(10, 10, 5);
+        bots.addBot(30, 30, 5);
     }
 
     @Override
@@ -205,6 +209,20 @@ public class Board extends JPanel implements ActionListener {
 //        }
     }
 
+    public void moveEnemies(){
+        Iterator ghostIter = ghosts.createIterator();
+        Iterator botIter = bots.createIterator();
+        moveEnemies(ghostIter);
+        moveEnemies(botIter);
+    }
+    
+    private void moveEnemies(Iterator iterator){
+        while(iterator.hasNext()) {
+            Enemy enemy = (Enemy) iterator.next();
+            enemy.move();
+        }
+    }
+    
     private void showIntroScreen(Graphics2D g2d) {
 
         g2d.setColor(new Color(0, 32, 48));
@@ -250,20 +268,6 @@ public class Board extends JPanel implements ActionListener {
 
         continueLevel();
     }
-    
-//    private void drawBomberman(Graphics2D g2d) {
-//            g2d.drawImage(bomberman1, bomberman_x - bombermand_x/2, 
-//               bomberman_y - bombermand_y/2, bombermand_x, bombermand_y, this );
-//        
-//    }
-//    private void drawMovingBomberman(Graphics2D g2d) {
-//        for (int i = 0; i < BOMBERMAN_MOVE_STEPS; i++){
-//            bomberman_x += (req_dx * bombermand_x / BOMBERMAN_MOVE_STEPS);
-//            bomberman_y += (req_dy * bombermand_y / BOMBERMAN_MOVE_STEPS);
-//            drawBomberman(g2d);
-//        }
-//        
-//    }
 
     private void drawMaze(Graphics2D g2d) {
 
@@ -379,61 +383,5 @@ public class Board extends JPanel implements ActionListener {
         g2d.drawImage(ii, 5, 5, this);
         Toolkit.getDefaultToolkit().sync();
         g2d.dispose();
-    }
-
-    class TAdapter extends KeyAdapter {
-
-        @Override
-        public void keyPressed(KeyEvent e) {
-
-            int key = e.getKeyCode();
-
-            if (inGame) {
-                if (key == KeyEvent.VK_LEFT) {
-                    req_dx = -1;
-                    req_dy = 0;
-                } else if (key == KeyEvent.VK_RIGHT) {
-                    req_dx = 1;
-                    req_dy = 0;
-                } else if (key == KeyEvent.VK_UP) {
-                    req_dx = 0;
-                    req_dy = -1;
-                } else if (key == KeyEvent.VK_DOWN) {
-                    req_dx = 0;
-                    req_dy = 1;
-                } else if (key == KeyEvent.VK_ESCAPE && timer.isRunning()) {
-                    inGame = false;
-                } else if (key == KeyEvent.VK_PAUSE) {
-                    if (timer.isRunning()) {
-                        timer.stop();
-                    } else {
-                        timer.start();
-                    }
-                }
-            } else {
-                if (key == 's' || key == 'S') {
-                    inGame = true;
-                    initGame();
-                }
-            }
-        }
-
-        @Override
-        public void keyReleased(KeyEvent e) {
-
-            int key = e.getKeyCode();
-
-            if (key == KeyEvent.VK_LEFT || key == KeyEvent.VK_RIGHT
-                    || key == KeyEvent.VK_UP || key == KeyEvent.VK_DOWN) {
-                req_dx = 0;
-                req_dy = 0;
-            }
-        }
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-        repaint();
     }
 }

@@ -46,7 +46,7 @@ import Movement.BombermanMovement;
 import java.io.DataOutputStream;
 import java.util.Queue;
 import java.util.Random;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import Board.Sprites.*;
 
 /**
  *
@@ -77,6 +77,8 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
     private int req_dx, req_dy, view_dx, view_dy;
     
     private int req_bomb;
+    private int bombCount = 0;
+    private int MAX_BOMBS = 1;
     
     private CustomSprite bombie;
     private Socket server_socket;
@@ -204,7 +206,15 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
         sl.start();
 
     }
-
+    
+    @Override
+    public void addBomb(String clientName, int x, int y){
+        BombSprite temp_b = new BombSprite(x, y, 30, 
+                30, this);
+        CustomSprite s = new BombSpriteToCustomSpriteAdapter(temp_b);
+        sprites.add(s);
+    }
+    
     @Override
     public void moveSelf(int x, int y) {
         bombie.Move(x, y);
@@ -296,6 +306,7 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
     private void playGame(Graphics2D g2d) {
         try {
             server_out.writeInt(req_bomb);
+            req_bomb = 0;
             server_out.writeInt(req_dx);
             server_out.writeInt(req_dy);
             server_out.flush();
@@ -518,13 +529,13 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
                     req_dx = 0;
                     req_dy = 0;
                     req_bomb = 1;
-                    
+                    bombCount += 1;
                 } 
                 else if (key == 'e' || key == 'E') {
                     req_dx = 0;
                     req_dy = 0;
                     req_bomb = 2;
-                    
+                    bombCount += 1;
                 } 
                 else if (key == KeyEvent.VK_ESCAPE && timer.isRunning()) {
                     inGame = false;
