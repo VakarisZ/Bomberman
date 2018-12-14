@@ -1,19 +1,24 @@
 package Board.Obstacles;
 
+import Mediator.Colleague;
+import Mediator.IMediator;
+
 /**
  * Obstacle abstract class
  *
  * @author Linas
  */
-public abstract class Obstacle {
+public abstract class Obstacle extends Colleague {
 
     //can the obstacle be destroyed?
     private boolean destructable;
     //can the player walk on the obstacle? (most likely to pick up smth)
     private boolean walkable;
+    
+    IMediator mediator;
 
     //constructor
-    public Obstacle(boolean destructable, boolean walkable) {
+    public Obstacle(boolean destructable, boolean walkable){
         this.destructable = destructable;
         this.walkable = walkable;
     }
@@ -56,5 +61,8 @@ public abstract class Obstacle {
     public void setWalkable(boolean walkable) {
         this.walkable = walkable;
     }
+    
+    
+    
 
 }

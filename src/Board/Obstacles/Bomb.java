@@ -1,6 +1,7 @@
 package Board.Obstacles;
 
 // TimeUnit - used for delay
+import Mediator.IMediator;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -84,17 +85,17 @@ public class Bomb extends BombDropper implements Cloneable {
     public void setExploded(boolean exploded) {
         this.exploded = exploded;
     }
-    
+
     @Override
     public void setPlanted(boolean planted) {
         this.planted = planted;
     }
 
     @Override
-    public int getDetonationTime(){
+    public int getDetonationTime() {
         return (int) (explosionTimer.getTimeUntilDetonation() * 1000);
     }
-    
+
     @Override
     public String toString() {
         return "explosionRadius=" + explosionRadius
@@ -102,9 +103,9 @@ public class Bomb extends BombDropper implements Cloneable {
     }
 
     @Override
-    public boolean addToServer(ArrayList<Bomb> bombs, 
-            String clientString, int x, int y){
-        if(super.countClientBombs(bombs, clientString) < MAX_BOMBS){
+    public boolean addToServer(ArrayList<Bomb> bombs,
+            String clientString, int x, int y) {
+        if (super.countClientBombs(bombs, clientString) < MAX_BOMBS) {
             Bomb bomb = new Bomb(false, true, 2, 2.0f, clientString, x, y);
             bombs.add(bomb);
             return true;
@@ -112,5 +113,35 @@ public class Bomb extends BombDropper implements Cloneable {
             return false;
         }
     }
-    
+
+    @Override
+    public void sendMessage(String message) {
+        System.out.println(message + " - sent message");
+        //this.mediator.broadcast(this, message);
+        this.mediator.broadcast(this, message);
+    }
+
+    @Override
+    public void receiveMessage(String message) {
+        //if (!isExploded()) {
+            System.out.println("received message from:" + message);
+            this.setExploded(true);
+        //}
+    }
+
+    @Override
+    public void explode() {
+        System.out.println("Board.Obstacles.Bomb.explode()");
+        if (!isExploded()) {
+            setExploded(true);
+            //this.sendMessage(Integer.toString(System.identityHashCode(this)));
+            sendMessage("bomba");
+        }
+    }
+
+    @Override
+    public void setMediator(IMediator mediator) {
+        this.mediator = mediator;
+    }
+
 }

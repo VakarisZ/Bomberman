@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.ArrayList;
 import Encryption.*;
+import Mediator.*;
 
 /**
  *
@@ -45,6 +46,8 @@ public class Connector implements IObserver {
     public Connector() {
     }
 
+    IMediator mediator;
+    
     public static void main(String[] args) {
         Connector c = new Connector();
         c.StartGame();
@@ -53,6 +56,7 @@ public class Connector implements IObserver {
 
     public void StartGame() {
         board = new Board();
+        this.mediator = new ConcreteMediator();
         board.initVariables();
         try {
             cc = new ClientConnector(5, clients, this);
@@ -68,8 +72,11 @@ public class Connector implements IObserver {
         for (MultiClient c : clients){
             if (c.isClientName(clientString))
             {
-                bomb = new Bomb(false, true, 2, 2.0f, clientString,
+                bomb = new Bomb(false, true, 2, 4.0f, clientString,
                         c.bomberman_x, c.bomberman_y);
+                bomb.setMediator(mediator);
+                mediator.addColleague(bomb);
+                
                 dropped = bomb.dropBomb(bombs);
             }
         }
