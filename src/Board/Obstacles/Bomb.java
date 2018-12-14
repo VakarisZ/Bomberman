@@ -18,17 +18,18 @@ public class Bomb extends BombDropper implements Cloneable {
     // explosion timer - time until the bomb explodes (SECONDS)
     private BombTimer explosionTimer;
     // How do we know who put the bomb?
-
+    public String bombString;
     // is the bomb planted (dropped)
     private boolean planted = false;
     // is the bomb planted (dropped)
     private boolean exploded = false;
 
     public Bomb(boolean destructable, boolean walkable,
-            int explosionRadius, float timeUntilDetonation, String clientString,
+            int explosionRadius, float timeUntilDetonation, String clientString, String bombString,
             int x, int y) {
         super(destructable, walkable, clientString, x, y);
         this.explosionRadius = explosionRadius;
+        this.bombString = bombString;
         this.explosionTimer = new BombTimer(timeUntilDetonation);
     }
 
@@ -105,7 +106,7 @@ public class Bomb extends BombDropper implements Cloneable {
     public boolean addToServer(ArrayList<Bomb> bombs, 
             String clientString, int x, int y){
         if(super.countClientBombs(bombs, clientString) < MAX_BOMBS){
-            Bomb bomb = new Bomb(false, true, 2, 2.0f, clientString, x, y);
+            Bomb bomb = new Bomb(false, true, 2, 2.0f, clientString, bombString, x, y);
             bombs.add(bomb);
             return true;
         } else {

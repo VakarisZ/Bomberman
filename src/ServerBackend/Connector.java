@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.ArrayList;
 import Encryption.*;
+import java.util.Random;
 
 /**
  *
@@ -43,6 +44,22 @@ public class Connector implements IObserver {
 //    Queue<MultiClient> clients;// = new ConcurrentLinkedQueue<MultiClient>();
     Queue<MultiClient> clients = new ConcurrentLinkedQueue<MultiClient>();
     public Connector() {
+    }
+    public String GenerateRandomString() {
+
+        int leftLimit = 97; // letter 'a'
+        int rightLimit = 122; // letter 'z'
+        int targetStringLength = 8;
+        Random random = new Random();
+        StringBuilder buffer = new StringBuilder(targetStringLength);
+        for (int i = 0; i < targetStringLength; i++) {
+            int randomLimitedInt = leftLimit + (int) (random.nextFloat() * (rightLimit - leftLimit + 1));
+            buffer.append((char) randomLimitedInt);
+        }
+        String generatedString = buffer.toString();
+
+        System.out.println(generatedString);
+        return generatedString;
     }
 
     public static void main(String[] args) {
@@ -68,7 +85,8 @@ public class Connector implements IObserver {
         for (MultiClient c : clients){
             if (c.isClientName(clientString))
             {
-                bomb = new Bomb(false, true, 2, 2.0f, clientString,
+                String bombname = GenerateRandomString();
+                bomb = new Bomb(false, true, 2, 2.0f, clientString, bombname,
                         c.bomberman_x, c.bomberman_y);
                 dropped = bomb.dropBomb(bombs);
             }
@@ -79,7 +97,12 @@ public class Connector implements IObserver {
             return null;
         }
     }
-    
+    public void explodeBomb(Bomb bomb){
+        for (MultiClient c : clients)
+            {
+                c.ExplodeBomb(bomb.bombString);
+            }
+    }
     public boolean Move(String clientString, int req_dx, int req_dy)
     {
         for (MultiClient c : clients){
@@ -148,6 +171,11 @@ public class Connector implements IObserver {
                     c.addBomb(bomb);
 //                    break;
                 }
+            }
+        }
+        for (Bomb b : bombs){
+            if (b.isExploded()){
+                explodeBomb(b);
             }
         }
         lock.unlock();

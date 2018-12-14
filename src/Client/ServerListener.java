@@ -55,6 +55,9 @@ public class ServerListener extends Thread{
                         y = infromServer.readInt();
                         clientName = infromServer.readUTF();
                         listener.addBomb(clientName, x, y);
+                    case(11):
+                        clientName = infromServer.readUTF();
+                        listener.explodeBomb(clientName);
                         
                         
                 }

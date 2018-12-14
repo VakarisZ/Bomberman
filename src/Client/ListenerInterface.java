@@ -14,4 +14,5 @@ public interface ListenerInterface {
     public void moveSelf(int x, int y);
     public void addEnemySprite(String clientName, int x, int y);
     public void addBomb(String clientName, int x, int y);
+    public void explodeBomb(String bombName);
 }

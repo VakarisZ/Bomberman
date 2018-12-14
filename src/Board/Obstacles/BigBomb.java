@@ -8,8 +8,8 @@ package Board.Obstacles;
 public class BigBomb extends Bomb {
 
     public BigBomb(boolean destructable, boolean walkable, int explosionRadius,
-            float explosionTimer, String clientString, int x, int y) {
-        super(destructable, walkable, explosionRadius, explosionTimer, clientString
+            float explosionTimer, String clientString, String bombString, int x, int y) {
+        super(destructable, walkable, explosionRadius, explosionTimer, clientString, bombString
         , x, y);
     }
 

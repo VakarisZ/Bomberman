@@ -11,8 +11,8 @@ public class BombFactory extends ObstacleFactory {
      * gal nenaudoti final, jei reikės pvz nuo powerupų pakeisti values, ir jei
      * bomb factory bus atskiras kiekvienam žaidėjui???
      */
-    private final BigBomb bigBomb = new BigBomb(false, true, 4, 4.0f, "abc", 0, 0);
-    private final SmallBomb smallBomb = new SmallBomb(false, true, 2, 2.0f, "abc", 0, 0);
+    private final BigBomb bigBomb = new BigBomb(false, true, 4, 4.0f, "abc","REE" , 0, 0);
+    private final SmallBomb smallBomb = new SmallBomb(false, true, 2, 2.0f, "abc", "LOL", 0, 0);
 
     @Override
     public Bomb createObstacle(ObstacleType obsType) {
