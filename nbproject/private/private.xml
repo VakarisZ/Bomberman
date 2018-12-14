@@ -3,23 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="1"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/ServerBackend/ClientConnector.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/ServerBackend/MultiClient.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/Board/Sprites/CustomSprite.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/Board/Sprites/BombermanDecorator.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/ServerBackend/IObserver.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/Board/Sprites/EnemyBombermanSprite.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/Board/Sprites/BombermanEnemySpriteToCustomSpriteAdapter.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/Board/Sprites/BombermanSpriteToCustomSpriteAdapter.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/ServerBackend/ClientListener.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/ServerBackend/Connector.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/Board/Sprites/BombermanSpriteInterface.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/Board/Board.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/Board/Bomberman.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/Board/Sprites/BombSprite.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/Board/Sprites/BombermanSprite.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/Client/ClientBoard.java</file>
-            <file>file:/home/mati/GDrive/Mokslai/KTU/VII_Semestras/netestavimas/Bomberman/src/Board/Sprites/BombSpriteToCustomSpriteAdapter.java</file>
+            <file>file:/C:/Sourcetree/Bomberman/src/Board/Point.java</file>
+            <file>file:/C:/Sourcetree/Bomberman/src/ServerBackend/Connector.java</file>
+            <file>file:/C:/Sourcetree/Bomberman/src/ServerBackend/MultiClient.java</file>
+            <file>file:/C:/Sourcetree/Bomberman/src/ServerBackend/Mariadb.java</file>
+            <file>file:/C:/Sourcetree/Bomberman/src/Client/ClientBoard.java</file>
+            <file>file:/C:/Sourcetree/Bomberman/src/Movement/ExplosionMovement.java</file>
         </group>
     </open-files>
 </project-private>

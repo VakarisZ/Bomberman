@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  */
 public class ClientConnector extends Thread{
 
-    private Queue<MultiClient> clients = new ConcurrentLinkedQueue<MultiClient>();
+    private Queue<IState> clients = new ConcurrentLinkedQueue<IState>();
     int maxClients;
     ServerSocket serverSocket;
     IObserver obs;
@@ -29,7 +29,7 @@ public class ClientConnector extends Thread{
 
     }
 
-    ClientConnector(int maxclients, Queue<MultiClient> cl, IObserver o) throws IOException {
+    ClientConnector(int maxclients, Queue<IState> cl, IObserver o) throws IOException {
         clients = cl;
         maxClients = maxclients;
         obs = o;
@@ -41,7 +41,7 @@ public class ClientConnector extends Thread{
             while (clients.size() < maxClients) {
                 serverSocket = new ServerSocket(4000);
                 Socket socket = serverSocket.accept();
-                MultiClient t = new MultiClient(socket, obs);
+                IState t = new StateAlive(socket, obs);
                 t.start();
                 clients.add(t);
                 System.out.println("New client connected");
@@ -50,6 +50,5 @@ public class ClientConnector extends Thread{
         } catch (IOException ex) {
             Logger.getLogger(ClientConnector.class.getName()).log(Level.SEVERE, null, ex);
         }
-
     }
 }

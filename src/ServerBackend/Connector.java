@@ -41,7 +41,7 @@ public class Connector implements IObserver {
     private int memento_test = -1;
     private MultiClientMemento savedState;
 //    Queue<MultiClient> clients;// = new ConcurrentLinkedQueue<MultiClient>();
-    Queue<MultiClient> clients = new ConcurrentLinkedQueue<MultiClient>();
+    Queue<IState> clients = new ConcurrentLinkedQueue<>();
     public Connector() {
     }
 
@@ -65,11 +65,11 @@ public class Connector implements IObserver {
     public Bomb DropBomb(String clientString, int req_bomb){
         boolean dropped = false;
         Bomb bomb = null;
-        for (MultiClient c : clients){
+        for (IState c : clients){
             if (c.isClientName(clientString))
             {
                 bomb = new Bomb(false, true, 2, 2.0f, clientString,
-                        c.bomberman_x, c.bomberman_y);
+                        c.get_bomberman_x(), c.get_bomberman_y());
                 dropped = bomb.dropBomb(bombs);
             }
         }
@@ -82,19 +82,19 @@ public class Connector implements IObserver {
     
     public boolean Move(String clientString, int req_dx, int req_dy)
     {
-        for (MultiClient c : clients){
+        for (IState c : clients){
             if (c.isClientName(clientString))
             {
                 board.req_dx = req_dx;
                 board.req_dy = req_dy;
-                board.bomberman_x = c.bomberman_x;
-                board.bomberman_y = c.bomberman_y;
+                board.bomberman_x = c.get_bomberman_x();
+                board.bomberman_y = c.get_bomberman_y();
                 board.playGame(g2d_placeholder);
-                if (board.bomberman_x != c.bomberman_x || 
-                        board.bomberman_y != c.bomberman_y)
+                if (board.bomberman_x != c.get_bomberman_x() || 
+                        board.bomberman_y != c.get_bomberman_y())
                 {
-                    c.bomberman_x = board.bomberman_x;
-                    c.bomberman_y = board.bomberman_y;                    
+                    c.set_bomberman_x(board.bomberman_x);
+                    c.set_bomberman_x(board.bomberman_y);                    
                     return true;
                 }
                 else{
@@ -117,7 +117,7 @@ public class Connector implements IObserver {
         if (Move(clientString, req_dx, req_dy))
         {
            
-            for (MultiClient c : clients)
+            for (IState c : clients)
             {
                 if (c.isClientName(clientString))
                 {
@@ -143,7 +143,7 @@ public class Connector implements IObserver {
         {
             Bomb bomb = DropBomb(clientString, req_bomb);
             if (bomb != null){
-                for (MultiClient c : clients)
+                for (IState c : clients)
                 {
                     c.addBomb(bomb);
                     break;
@@ -154,22 +154,10 @@ public class Connector implements IObserver {
     }
 
     public void NotifyAll(String clientString) {
-        for (MultiClient c : clients)
+        for (IState c : clients)
             {
                 if (!c.isClientName(clientString))
                 {
-//                    if (memento_test == 15) 
-//                    {
-//                        savedState = c.saveState();
-//                        memento_test--;
-//                    }
-//                    else if (memento_test < 15 && memento_test != 0){
-//                        memento_test--;
-//                    }
-//                    else{
-//                        c.setState(savedState);
-//                    }
-//                    System.out.print(memento_test);
                     c.MoveKnownClient(clientString, board.bomberman_x, board.bomberman_y);
                 }
             }
