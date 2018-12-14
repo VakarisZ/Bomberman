@@ -146,7 +146,7 @@ public class Connector implements IObserver {
                 for (MultiClient c : clients)
                 {
                     c.addBomb(bomb);
-                    break;
+//                    break;
                 }
             }
         }
