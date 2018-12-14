@@ -29,16 +29,19 @@ public class FlyweightImageFactory {
                 case Enemy:
                     flyweightImage = new EnemyImage();
                     break;
+                default:
+                    flyweightImage = new NullObjectImage();
+                    break;
             }
             flyweights.put(imageKey, flyweightImage);
-            /*System.out.println("Creating BigBombImage Flyweight, with key: " + imageKey
+            System.out.println("Creating BigBombImage Flyweight, with key: " + imageKey
                     + " | and Image object id:" + System.identityHashCode(((FlyweightImage) flyweights.get(imageKey)).getImage())
-            );*/
+            );
             return flyweightImage;
         }
-        /*System.out.println("Using " + imageKey + " flyweight Image"
+        System.out.println("Using " + imageKey + " flyweight Image"
                 + " | and Image object id:" + System.identityHashCode(((FlyweightImage) flyweights.get(imageKey)).getImage())
-        );*/
+        );
         return flyweightImage;
     }
 
