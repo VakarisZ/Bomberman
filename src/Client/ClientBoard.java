@@ -31,8 +31,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 import Board.Cell;
-import Board.Flyweights.FlyweightImageFactory;
-import Board.Flyweights.FlyweightImageKeys;
 import Board.Sprites.CustomSprite;
 import Board.Point;
 import Board.Sprites.BombermanEnemySpriteToCustomSpriteAdapter;
@@ -499,15 +497,6 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
         ghost = new ImageIcon("images/ghost.png").getImage();
         bomberman1 = new ImageIcon("images/bomber_fixed.png").getImage();
 
-    }
-
-    @Override
-    public void explodeBomb(String bombName) {
-        for (CustomSprite c : sprites) {
-            if (c.equals(bombName)) {
-                c.ChangeImage(FlyweightImageFactory.getFlyweightImage(FlyweightImageKeys.NullObject).getImage());
-            }
-        }
     }
 
     class TAdapter extends KeyAdapter {

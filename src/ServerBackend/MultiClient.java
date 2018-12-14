@@ -141,15 +141,7 @@ public class MultiClient extends Thread {
 //        bomberman_y = y;
 //
 //    }
-    public void ExplodeBomb(String bombname){
-        try {
-            outtoClient.writeInt(11);
-            outtoClient.writeUTF(bombname);
-            outtoClient.flush();
-        } catch (IOException ex) {
-            Logger.getLogger(MultiClient.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+    
     public void MoveKnownClient(String clientString, int bx, int by)
     {
         try {
