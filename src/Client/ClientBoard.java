@@ -47,6 +47,8 @@ import java.io.DataOutputStream;
 import java.util.Queue;
 import java.util.Random;
 import Board.Sprites.*;
+import Mediator.ConcreteMediator;
+import Mediator.IMediator;
 
 /**
  *
@@ -112,8 +114,11 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
     private int currentSpeed = 32;
     private short[] screenData;
     private Timer timer;
+    
+    public IMediator mediator;
 
     public ClientBoard() {
+        this.mediator = new ConcreteMediator();
         sprites = new LinkedList<CustomSprite>();
         loadImages();
         try {
@@ -212,6 +217,7 @@ public class ClientBoard extends JPanel implements ActionListener, ListenerInter
         BombSprite temp_b = new BombSprite(x, y, 30, 
                 30, this);
         CustomSprite s = new BombSpriteToCustomSpriteAdapter(temp_b);
+        
         sprites.add(s);
     }
     
